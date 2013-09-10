@@ -17,11 +17,6 @@ class Autoloader
 {
 
 	/**
-	* Handles the Core cached data.
-	*/
-	private $core;
-
-	/**
 	* (boolean)
 	* true: is overriding
 	* false: not overriding
@@ -34,11 +29,6 @@ class Autoloader
 	function __construct()
 	{
 		/**
-		* Retrieves Core cached data
-		*/
-		$this -> core_env_file_extension = \Tipui\Core::CORE_ENV_FILE_EXTENSION;
-
-		/**
 		* Registering the method for autoload process
 		*/
 		spl_autoload_register( array( '\Tipui\Builtin\Autoloader', 'Init' ) );
@@ -49,7 +39,6 @@ class Autoloader
 	*/
 	function __destruct()
 	{
-		$this -> core       = null;
 		$this -> overriding = null;
 	}
 
@@ -74,6 +63,11 @@ class Autoloader
 		$this -> overriding = false;
 
 		/**
+		* Get file name extension of PHP Files
+		*/
+		$file_extension = \Tipui\Core::CORE_ENV_FILE_EXTENSION;
+
+		/**
 		* determines which path is the base path, based on namespace based class name
 		*/
 		if( strpos( $class_name, __NAMESPACE__ ) === 0 )
@@ -95,7 +89,7 @@ class Autoloader
 						/**
 						* Including the file, if exists
 						*/
-						$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $this -> core_env_file_extension;
+						$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $file_extension;
 						//echo $file; exit;
 						if( file_exists( $file ) )
 						{
@@ -140,16 +134,14 @@ class Autoloader
 		/**
 		* Debug purposes
 		*/
-		//print_r( $this -> core ); exit;
 		//print_r( $ns );
-		//echo 'FILE_EXTENSION: ' . $this -> core['ENV']['FILE_EXTENSION']; exit;
 
 		/**
 		* Including the file, if exists
 		*/
 		if( !$this -> overriding )
 		{
-			$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $this -> core_env_file_extension;
+			$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $file_extension;
 			if( file_exists( $file ) )
 			{
 				require_once( $file );
@@ -162,7 +154,7 @@ class Autoloader
 		/**
 		* Clear variables
 		*/
-		unset( $class_name, $ns );
+		unset( $class_name, $ns, $file_extension );
 
 		return null;
 	}
