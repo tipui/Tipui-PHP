@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-07-25 02:59:00
+* @updated: 2013-09-10 01:26:00
 */
 
 class Cookie
@@ -147,4 +147,3 @@ class Cookie
         return null;
     }
 }
-?>

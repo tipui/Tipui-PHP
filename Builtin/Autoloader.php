@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-07-08 02:09:00
+* @updated: 2013-08-31 16:10:00
 */
 
 namespace Tipui\Builtin;
@@ -36,12 +36,7 @@ class Autoloader
 		/**
 		* Retrieves Core cached data
 		*/
-		$this -> core = \Tipui\FW::GetCoreDataCache( 'GetENV' );
-
-		/**
-		* Debug purposes
-		*/
-		//print_r($this -> core); exit;
+		$this -> core_env_file_extension = \Tipui\Core::CORE_ENV_FILE_EXTENSION;
 
 		/**
 		* Registering the method for autoload process
@@ -54,7 +49,7 @@ class Autoloader
 	*/
 	function __destruct()
 	{
-		$this -> core = null;
+		$this -> core       = null;
 		$this -> overriding = null;
 	}
 
@@ -64,7 +59,7 @@ class Autoloader
 		/**
 		* Debug purposes
 		*/
-		//echo TIPUI_PATH . PHP_EOL . TIPUI_APP_PATH . PHP_EOL . PHP_EOL . __NAMESPACE__ . PHP_EOL . $class_name . PHP_EOL;
+		//echo TIPUI_PATH . PHP_EOL . TIPUI_APP_PATH . PHP_EOL . __NAMESPACE__ . PHP_EOL . $class_name . PHP_EOL . PHP_EOL;
 
 		/**
 		* Converting the $class_name string into array. If the Operational System of enviroment uses normal slash as directory separator, then, the namespace backslash will be replaced with normal slash
@@ -91,16 +86,16 @@ class Autoloader
 			*/
 			if( count( $ns ) >= 2 )
 			{
-				if( $ns[0] == $this -> core['ENGINE']['builtin_folder'] )
+				if( $ns[0] == 'Builtin' )
 				{
 					//echo TIPUI_APP_PATH . $this -> core['ENGINE']['override_folder'] . PHP_EOL;
-					$base_path = TIPUI_APP_PATH . $this -> core['ENGINE']['override_folder'] . DIRECTORY_SEPARATOR;
+					$base_path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR;
 					if( file_exists( $base_path ) and is_dir( $base_path ) )
 					{
 						/**
 						* Including the file, if exists
 						*/
-						$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $this -> core['ENV']['FILE_EXTENSION'];
+						$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $this -> core_env_file_extension;
 						//echo $file; exit;
 						if( file_exists( $file ) )
 						{
@@ -154,7 +149,7 @@ class Autoloader
 		*/
 		if( !$this -> overriding )
 		{
-			$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $this -> core['ENV']['FILE_EXTENSION'];
+			$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $this -> core_env_file_extension;
 			if( file_exists( $file ) )
 			{
 				require_once( $file );

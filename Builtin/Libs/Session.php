@@ -8,8 +8,10 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-07-25 02:46:00
+* @updated: 2013-09-09 19:28:00
 */
+
+namespace Tipui\Builtin\Libs;
 
 class Session
 {
@@ -24,7 +26,7 @@ class Session
 		/**
 		* If session_id is empty, means that session was not started.
 		*/
-        if( empty( session_id() ) )
+        if( session_id() == '' )
         {
             session_start();
         }
@@ -41,18 +43,6 @@ class Session
 		$this -> exists = false;
 	}
 
-	/**
-	* Usage sample:
-	* [code]
-	* // Auto set default cookie parameters
-	* $c = new Session;
-	* $c -> Get( 'foo' );
-	* if( $data = $c -> Exists() ){
-	*     print_r( $data ); 
-	* }
-	* $c2 = new Cookie( $env_cookies['COOKIE_TIME'], $env_cookies['COOKIE_TIME_MODE'], $env_bootstrap['DOMAIN'], $env_bootstrap['SUBDOMAIN'] );
-	* [/code]
-	*/
     public function Exists( $key, $value )
     {
 		return !$this -> exists ? $this -> exists : $this -> data;
@@ -135,11 +125,10 @@ class Session
 
     public function Destroy()
     {
-        if( !empty( session_id() ) )
+        if( session_id() != '' )
         {
             session_destroy();
         }
     }
 
 }
-?>

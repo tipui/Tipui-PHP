@@ -8,15 +8,17 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-07-08 02:09:00
+* @updated: 2013-09-08 17:35:00
 */
 
 namespace Tipui;
 
+use \Tipui\Builtin\Libs as Libs;
+
 class Core
 {
 	/**
-	* Handles the enviroment settings
+	* Handles the environment settings
 	*/
 	private $env;
 
@@ -26,12 +28,47 @@ class Core
 	private $sapi_is_cli;
 
 	/**
+	* Handles FileSystem instance
+	*/
+	private $fs;
+
+	/**
 	* Handles the request results
 	*/
 	private $request;
 
 	/**
-	* Initiates general settings
+	* Handles Lib Session instance.
+	*/
+	private $session;
+
+	/**
+	* Path base to store core data cache files.
+	*/
+	private $cache_storage_env_dir;
+
+	/**
+	* Handle core data cache file content.
+	*/
+	private $core_cached_data;
+
+	/**
+	* Handle methods results.
+	*/
+	private $core_methods_cached_data;
+
+	/**
+	* Core data cache file name extension.
+	*/
+	const CORE_CACHE_FILE_EXTENSION = '.json';
+
+	/**
+	* PHP scripts files names extension.
+	*/
+	const CORE_ENV_FILE_EXTENSION = '.php';
+
+	/**
+	* Initiates properties
 	*/
     public function __construct()
     {
@@ -42,133 +79,279 @@ class Core
 		//echo '[' . time() . ']' . PHP_EOL;
 
 		/**
-		* Detect if script is running over HTTP or CLI
+		* Clear properties
 		*/
-		$this -> sapi_is_cli = ( php_sapi_name() == 'cli' ) ? true : false;
+		$this -> ResetProperties();
 
 		/**
-		* Loads general settings
+		* Defines Storage path for environment data cache files.
 		*/
-		$this -> LoadSettings();
+		$this -> cache_storage_env_dir = TIPUI_APP_PATH . 'Storage' . DIRECTORY_SEPARATOR . 'env' . DIRECTORY_SEPARATOR;
+
+		return null;
+
+	}
+
+	/**
+	* Initiates general settings
+	*/
+    public function __destruct()
+    {
+
+		/**
+		* Clear properties
+		*/
+		$this -> ResetProperties();
+
+		return null;
+
+	}
+
+	/**
+	* Clear properties.
+	*/
+    public function ResetProperties()
+    {
+		$this -> env     = null;
+		$this -> fs      = null;
+		$this -> core_methods_cached_data = null;
+		$this -> core_cached_data         = null;
+		$this -> session = null;
 
 		return null;
 	}
 
 	/**
-	* Registered enviroment settings files
+	* Registered environment settings files
 	*/
-    private function GetRegisteredSettingsFiles( )
+    private function GetRegisteredSettingsFiles()
     {
-		return array( 'BOOTSTRAP', 'URL', 'PHP', 'ENGINE', 'TIME_ZONE', 'COOKIES', 'MODULES', 'TEMPLATES', 'INTERFACE' );
+		return array( 'BOOTSTRAP', 'PHP', 'URL', 'TIME_ZONE', 'COOKIES', 'MODULES', 'TEMPLATES' );
 	}
 
 	/**
-	* Loads bootstrap and general files for enviroment settings
+	* Loads bootstrap and general files for environment settings
 	*/
-    private function LoadSettings()
+    public function LoadSettings()
     {
 
 		/**
-		* @brief Abstract the enviroment settings from the main file
+		* Path of public/index file
 		*/
 		$script_path   = $_SERVER['SCRIPT_FILENAME'];
+
+		/**
+		* Directory of app configuration files. (independent, but required by the core)
+		*/
 		$app_conf_path = TIPUI_APP_PATH . 'config' . DIRECTORY_SEPARATOR;
 
+		/**
+		* Gets the environment settings from the main file ENV.json
+		*/
 		$env_json = json_decode( file_get_contents( $app_conf_path . 'env' . DIRECTORY_SEPARATOR . 'ENV.json' ), true );
-		$env_name = strpos( str_replace( '/', DIRECTORY_SEPARATOR, $script_path ), DIRECTORY_SEPARATOR . $env_json['DEV'] . '-' ) ? $env_json['DEV'] : $env_json['PRODUCTION'] ;
 
+		/**
+		* Debug purposes
+		*/
 		//print_r( $env_json ); exit;
 
-		// stores to $env property
+		/**
+		* Instantiates Library FileSystem
+		*/
+		$this -> fs = new Libs\FileSystem;
+
+		/**
+		* Check if Core ENV data cache file exists.
+		* If exists, interrupt execution of this method.
+		* 
+		*/		
+		if( !$env_json['CACHE_REGENERATE'] and $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CORE_CACHE_FILE_EXTENSION ) )
+		{
+	
+			$this -> env['URL']     = $this -> GetEnv( 'URL' );
+			$this -> env['MODULES'] = $this -> GetEnv( 'MODULES' );
+	
+			$this -> fs = null;
+			return null;
+		}
+
+		/**
+		* Gets the environment name
+		* Example:
+		* Production: (http://tipui.com) /www/tipui.com/...
+		* Development: (http://dev-tipui.com/) /www/dev-tipui.com/...
+		* The logic is, if contains [code]$env_json['DEV'] . '-'[/code] then, means that is running under development environment.
+		*/
+		$env_name = strpos( str_replace( '/', DIRECTORY_SEPARATOR, $script_path ), DIRECTORY_SEPARATOR . $env_json['DEV'] . '-' ) ? $env_json['DEV'] : $env_json['PRODUCTION'] ;
+
+		/**
+		* Prepares the ENV index for Core cache file.
+		*/
 		$env = array( 
 				'CONF_PATH'        => $app_conf_path,
-				'FILE_EXTENSION'   => '.php',
 				'PRODUCTION'       => $env_json['PRODUCTION'],
 				'DEV'              => $env_json['DEV'],
 				'NAME'             => $env_name,
 				'PATH'             => $app_conf_path . 'env' . DIRECTORY_SEPARATOR . $env_name . DIRECTORY_SEPARATOR,
 		);
 
+		/**
+		* Saves index ENV to Core cache file.
+		*/
 		$this -> SetENV( 'ENV', $env );
 
+		/**
+		* Clean up used variables.
+		*/
 		unset( $script_path, $env_json, $env_name, $app_conf_path );
 
 		/**
-		* @brief General constants specific for the enviroment
+		* Gets all registered index for Core cache files.
 		*/
 		$env_files = $this -> GetRegisteredSettingsFiles();
-		foreach( $env_files as $v )
-		{
-			require_once( $env['PATH'] . $v . $env['FILE_EXTENSION'] );
-		}
 
 		/**
-		* $array variable is declared into included files
+		* Iterates array above ([code]$env_files[/code]) to create all Core cache files.
+		*/
+		foreach( $env_files as $v )
+		{
+			require_once( $env['PATH'] . $v . self::CORE_ENV_FILE_EXTENSION );
+			$this -> SetENV( $v, $array );
+		}
+		
+		/**
+		* Clean up used variables. 
+		* The [code]$array[/code] variable is declared into included files above
 		*/
 		unset( $env, $env_files, $v, $array );
 
+		/**
+		* Clear FileSystem instance
+		*/
+		$this -> fs = null;
+
 		return null;
 	}
 
 	/**
-	* Returns method of core data storage
-	* array, session, sqlite, etc
+	* Loads and starts autoloading.
 	*/
-    public function Autoloader( )
+	// [review] Test on Start file instead of here.
+	// benchmark and research about issues or benefits
+    public function Autoloader()
     {
-		require_once( TIPUI_PATH . $this -> env['ENGINE']['builtin_folder'] . DIRECTORY_SEPARATOR . 'Autoloader' . $this -> env['ENV']['FILE_EXTENSION'] );
-		$a = new Builtin\Autoloader;
-		unset( $a );
+
+		/**
+		* Subfolder and name of Autoloader file.
+		*/
+		$file = 'Builtin' .  DIRECTORY_SEPARATOR . 'Autoloader' . self::CORE_ENV_FILE_EXTENSION;
+
+		/**
+		* Path of override file.
+		*/
+		$path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . $file;
+
+		/**
+		* Check if override path exists.
+		*/
+		if( file_exists( $path ) )
+		{
+			require_once( $path );
+		}else{
+			/**
+			* Use default builtin class.
+			*/
+			require_once( TIPUI_PATH . $file );
+		}
+
+		/**
+		* Instantiates Autoloader class.
+		*/
+		$a = new Builtin\Autoloader();
+
+		/**
+		* Clear used variables.
+		*/
+		unset( $a, $path, $file );
+
 		return null;
+
 	}
 
 	/**
-	* Returns method of core data storage
-	* array, session, sqlite, etc
-	*/
-    public function GetCoreStorageMode( )
-    {
-		return $this -> env['ENGINE']['env_storage'];
-	}
-
-	/**
-	* Stores enviroment config data
+	* Stores Core data in cache files (json format)
 	*/
     private function SetENV( $index, $value )
     {
 		$this -> env[ $index ] = $value;
+		$this -> fs -> WriteFile( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION, json_encode( $value ) );
+		return null;
 	}
 
 	/**
-	* Get stored enviroment config data
+	* Gets Core data in cache files (json format)
 	*/
-    public function GetENV( $index = false, $subindex = false )
+    public function GetENV( $index, $subindex = false )
     {
 
-		if( !$index )
+		if( $this -> fs == null )
 		{
-			return $this -> env;
-		}else if( isset( $this -> env[ $index ] ) ){
+			/**
+			* Instantiates FileSystem class
+			*/
+			$this -> fs = new Libs\FileSystem;
+		}
+
+		$this -> core_cached_data[$index] = json_decode( $this -> fs -> ReadFile( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ), true );
+
+		if( $this -> fs -> FileExists( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ) )
+		{
 			if( !$subindex )
 			{
-				return $this -> env[ $index ];
-			}else if( isset( $this -> env[ $index ][ $subindex ] ) ){
-			
-				return $this -> env[ $index ][ $subindex ];
+				/**
+				* Returns entire index data
+				*/
+				return $this -> core_cached_data[$index];
+
+			}else{
+
+				if( isset( $this -> core_cached_data[$index][$subindex] ) )
+				{
+					/**
+					* Returns subindex if exists.
+					*/
+					return $this -> core_cached_data[$index][$subindex];
+
+				}else{
+
+					throw new \Exception('Core cache file data subindex "' . $subindex . '" not found for index "' . $index . '".');
+
+				}
+
 			}
+
 		}else{
-			//print_r( $this -> env );
-			//echo '[EMPTY] ' . $index . PHP_EOL;
-			//throw new \Exception('Index not exists.');
+
+			throw new \Exception('Core cache file for index "' . $index . '" not found.');
+
 		}
 
 		return false;
 	}
 
 	/**
-	* (boolean) Retrieves the value os property
+	* Detect if script is running over HTTP or CLI
 	*/
-    public function IsCliMode( )
+    public function CheckCliMode()
+    {
+		$this -> sapi_is_cli = ( php_sapi_name() == 'cli' ) ? true : false;
+	}
+
+	/**
+	* Retrieves the cli mode
+	* (boolean)
+	*/
+    public function IsCliMode()
     {
 		return $this -> sapi_is_cli;
 	}
@@ -176,7 +359,7 @@ class Core
 	/**
 	* Abstracts parameters from HTTP or CLI
 	*/
-    public function Request( )
+    public function Request()
     {
 
 		/**
@@ -220,7 +403,7 @@ class Core
 	/**
 	* Prepare routing
 	*/
-    public function Routing( )
+    public function Routing()
     {
 
 		$clss = str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $this -> request['URI'] );
@@ -311,13 +494,19 @@ class Core
     private function RoutingPathScanner( $path_base, $clss )
     {
 
-		// folders levels
+		/**
+		* folders levels
+		*/
 		$i       = $this -> env['URL']['FOLDER_LEVELS'];
 
-		// (boolean) true: path found, false: path not found
+		/**
+		* (boolean) true: path found, false: path not found
+		*/
 		$goal    = false;
-		
-		// Handles the Routing/Module class
+
+		/**
+		* Handles the Routing/Module class
+		*/
 		$routing = false;
 
 		while( $i > 0 and !$goal and !empty( $clss ) )
@@ -325,18 +514,27 @@ class Core
 			if( $path_base == 'Model' )
 			{
 
-				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . $this -> env['ENV']['FILE_EXTENSION'];
+				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . self::CORE_ENV_FILE_EXTENSION;
 
+				/**
+				* Debug purposes
+				*/
 				//echo $path . ': ';
 
 				if( file_exists( $path ) )
 				{
+					/**
+					* Debug purposes
+					*/
 					//echo 'ok';
 					//echo $clss; exit;
 					$goal = true;
 					$rs   = array( 'path' => $path, 'class' => $clss );
 				}else{
 					$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
+					/**
+					* Debug purposes
+					*/
 					//echo 'ng [next] ' . $clss;
 				}
 
@@ -349,10 +547,14 @@ class Core
 
 				if( $rs = $routing -> Get( $clss ) )
 				{
+	
+					/**
+					* Debug purposes
+					*/
 					//echo 'ok';
 					//print_r( $rs ); exit;
 					$goal       = true;
-					$rs['path'] = TIPUI_APP_PATH . 'Model' . DIRECTORY_SEPARATOR . str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $rs['class'] ) . $this -> env['ENV']['FILE_EXTENSION'];
+					$rs['path'] = TIPUI_APP_PATH . 'Model' . DIRECTORY_SEPARATOR . str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $rs['class'] ) . self::CORE_ENV_FILE_EXTENSION;
 
 					if( !file_exists( $rs['path'] ) )
 					{
@@ -361,14 +563,25 @@ class Core
 
 				}else{
 					$clss = substr( $clss, 0, strrpos( $clss, $this -> env['URL']['PFS'] ) );
+					/**
+					* Debug purposes
+					*/
 					//echo 'ng [next] ' . $clss;
 				}
 
 			}
+
+			/**
+			* Debug purposes
+			*/
 			//echo PHP_EOL;
 
 			$i--;
 		}
+
+		/**
+		* Debug purposes
+		*/
 		//echo $path;
 		//exit;
 
@@ -379,11 +592,67 @@ class Core
 	}
 
 	/**
-	* Browse headers and general info (REFERER, IP, Browser name, version, language, etc)
+	* Retrieves the cached Core data on storage cache files
 	*/
-    public function Browse( )
-    {
-		return Builtin\Libs\Browse::GetData();
+	public function GetMethodDataCache( $method = false, $instance = false )
+	{
+
+		if( $this -> session == null )
+		{
+			$this -> session = new Libs\Session;
+		}
+
+		/**
+		* Get from session.
+		*/
+		$this -> core_methods_cached_data[$method] = $this -> session -> Get( 'Tipui::Core::' . $method );
+
+		if( isset( $this -> core_methods_cached_data[$method] ) )
+		{
+
+			if( !$instance )
+			{
+
+				return $this -> core_methods_cached_data[$method];
+
+			}else{
+
+				if( isset( $this -> core_methods_cached_data[$method][$instance] ) )
+				{
+
+					return $this -> core_methods_cached_data[$method][$instance];
+
+				}else{
+
+					throw new \Exception('Core method cache data instance "' . $instance . '" not found for method "' . $method . '".');
+
+				}
+
+			}
+
+		}else{
+
+			throw new \Exception('Core method cache "' . $method . '" not found.');
+
+		}
+
 	}
+
+	/**
+	* Stores methods results to cache (session)
+	*/
+	public function SetMethodDataCache( $method )
+	{
+
+		if( $this -> session == null )
+		{
+			$this -> session = new Libs\Session;
+		}
+
+		$this -> session -> Set( 'Tipui::Core::' . $method, $this -> $method() );
+
+		return null;
+
+	}
+
 }
-?>

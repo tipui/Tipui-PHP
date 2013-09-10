@@ -1,14 +1,14 @@
 <?php
 
 /**
-* @class  Strings
-* @file   Strings.php
-* @brief  Strings functions.
+* @class  Template
+* @file   Template.php
+* @brief  Template functions.
 * @date   2011-01-18 13:49:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-07-01 06:01:00
+* @updated: 22013-09-09 19:28:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -50,7 +50,7 @@ class Template
 	/**
 	* Renderer
 	*/
-    function Compile( $data, $dir = false, $file = false ) 
+    public function Compile( $data, $dir = false, $file = false ) 
     {
 
         $k   = $this->tag;
@@ -112,5 +112,3 @@ class Template
 
 
 }
-
-?>

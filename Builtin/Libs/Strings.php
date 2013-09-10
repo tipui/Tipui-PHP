@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-06-21 20:46:00
+* @updated: 2013-09-09 19:28:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -17,14 +17,14 @@ class Strings
 {
 
 
-    public function StrLen( $str, $charset = 'UTF-8' )
+    public static function StrLen( $str, $charset = 'UTF-8' )
 	{
 
         return mb_strlen( $str, $charset );
 
     }
 
-    public function Trim( $str )
+    public static function Trim( $str )
 	{
 
         //return trim( $str );
@@ -32,14 +32,14 @@ class Strings
     
     }
 
-    public function ChunkSpaces( $str )
+    public static function ChunkSpaces( $str )
 	{
 
 		return preg_replace('!\s+!', ' ', $str);
     
     }
 
-    public function NumbersOnly( $str, $float = false )
+    public static function NumbersOnly( $str, $float = false )
     {
         if( !is_array( $str ) )
         {
@@ -54,7 +54,7 @@ class Strings
         return '';
     }
 
-    public function ValidMailAddress( $str )
+    public static function ValidMailAddress( $str )
 	{
 
 		//$str = trim( $str );
@@ -72,7 +72,7 @@ class Strings
 
     }
 
-	public function LimitStr( $str = '', $limit = 10, $dots = '...' )
+	public static function LimitStr( $str = '', $limit = 10, $dots = '...' )
 	{
 		if( mb_strlen( $str ) <= $limit )
 		{
@@ -82,14 +82,14 @@ class Strings
 		return mb_substr( $str, 0, $limit ) . $dots;
 	}
 
-    public function RomanAlphabet( $mode = 'auto' )
+    public static function RomanAlphabet( $mode = 'auto' )
     {
 
         return self::ParseRange( 'A', 'Z', $mode );
 
     }
 
-    public function ParseRange( $start = false, $end = false, $mode = 'auto' )
+    public static function ParseRange( $start = false, $end = false, $mode = 'auto' )
     {
 
         if( !$start or !$end )
@@ -119,7 +119,7 @@ class Strings
 
     }
 	
-	public function MoneyFormat( $n = false, $d = false )
+	public static function MoneyFormat( $n = false, $d = false )
 	{
         $r = Strings::NumbersOnly( $n );
 		//echo Strings::NumbersOnly( $n ); exit;
@@ -151,7 +151,7 @@ class Strings
         */
     }
 
-	public function isJapaneseUTF8( $str, $kanji = true, $hiragana = true, $katakana = true, $japaneseAlphaNum = true, $alphaNum = false, $forceUTF8 = false )
+	public static function isJapaneseUTF8( $str, $kanji = true, $hiragana = true, $katakana = true, $japaneseAlphaNum = true, $alphaNum = false, $forceUTF8 = false )
 	{
 
 		// google: php 正規表現 漢字
@@ -177,7 +177,7 @@ class Strings
 		}
 	}
 	
-	public function Escape( $str, $escape = false, $exceptions = false )
+	public static function Escape( $str, $escape = false, $exceptions = false )
 	{
 		//print_r( $escape ); exit;
 		//echo time(); exit;
@@ -270,19 +270,19 @@ class Strings
 	}
 
 	
-    public function StripTags( $v, $allow = '' )
+    public static function StripTags( $v, $allow = '' )
     {
         return strip_tags( $v, $allow );
     }
 
 
     // add an element at the beginning of an array
-    public function ArrayRpush( $arr, $item )
+    public static function ArrayRpush( $arr, $item )
     {
       return array_pad( $arr, -( count( $arr ) + 1 ), $item );
     }
 
-	public function RandomChar( )
+	public static function RandomChar( )
 	{
 		$c = range( 'A', 'Z' );
 		$n = range( '0', '9' );
@@ -294,14 +294,14 @@ class Strings
 		return $p;
 	}
 	
-	public function Highlight( $str, $s, $n = array( '<b>', '</b>' ) )
+	public static function Highlight( $str, $s, $n = array( '<b>', '</b>' ) )
 	{
 		//echo 'aaa: ' . $s; exit;
 		return str_ireplace( $s, $n[0] . $s . $n[1], $str );
 		//return preg_replace("/($s)/i", $n[0] . '$1' . $n[1], $str);
 	}
 
-	public function StrBr( $str, $force = false )
+	public static function StrBr( $str, $force = false )
 	{
 		if( !$force )
 		{
@@ -314,7 +314,7 @@ class Strings
 		}
 	}
 
-	public function SEOFilter( $str )
+	public static function SEOFilter( $str )
 	{
 		$f = array( '%', '　', ' ', '/', '~', 'á', 'é', 'í', 'ó', 'ú', 'â', 'ê', 'î', 'ô', 'û', 'à', 'è', 'ì', 'ò', 'ù', 'ã', 'õ', 'ç', 'ñ', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'À', 'È', 'Ì', 'Ò', 'Ù', 'Ã', 'Õ', 'Ç', 'Ñ' );
 		$t = array( '', '_', '_', '-', '_', 'a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a', 'o', 'c', 'n', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'O', 'C', 'N' );
@@ -322,12 +322,12 @@ class Strings
 		return $str;
 	}
 
-	public function SEO_strip( $str )
+	public static function SEO_strip( $str )
     {
 		return self::SEOFilter( trim( substr( $str, 0, Register_Strings::SEO_STR_MAX_LENGTH ) ) );
     }
 
-	public function WordBreak( $str, $limit = 15, $escape = false, $break = ' ' )
+	public static function WordBreak( $str, $limit = 15, $escape = false, $break = ' ' )
     {
 		$str = mb_ereg_replace('#(\S{' . $limit . ',})#e', "chunk_split('$1', " . $limit . ", '" . $break . "')", $str );
 		if( $escape ){
@@ -336,7 +336,7 @@ class Strings
 		return $str;
     }
 
-	public function alphaID($in, $to_num = false, $pad_up = false, $passKey = null)
+	public static function alphaID($in, $to_num = false, $pad_up = false, $passKey = null)
 	{
 		$index = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		if ($passKey !== null) {
@@ -418,4 +418,3 @@ class Strings
 		return $str[0];
 	}
 }
-?>

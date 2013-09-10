@@ -8,11 +8,14 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-07-11 03:09:00
+* @updated: 2013-09-09 19:28:00
 */
 
 namespace Tipui\Builtin\Libs;
 
+/**
+* Browse headers and general info (REFERER, IP, Browser name, version, language, etc)
+*/
 class Browse
 {
 
@@ -82,7 +85,7 @@ class Browse
 	/**
 	* Get IP, Proxy
 	*/
-    public function GetRemoteInfo()
+    public  static function GetRemoteInfo()
 	{
 
 		$proxy = '';
@@ -122,4 +125,3 @@ class Browse
 					);
     }
 }
-?>
