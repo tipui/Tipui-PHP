@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-09 19:55:00
+* @updated: 2013-09-12 13:30:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -24,52 +24,55 @@ class DataRules
 	{
 
 		/**
-		* Converting the $rule string slashes.
-		* If the Operational System of enviroment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
-		*/
-		$rule_file = ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule;
-
-		/**
 		* If the rule is not handled in array $rules, then, load from DataRules file.
 		*/
 		if( !isset( self::$rules[$rule] ) )
 		{
 
 			/**
-			* Building the overriding file path
+			* Converting the $rule string slashes.
+			* If the Operational System of enviroment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
 			*/
-			$rule_file = 'Builtin' . DIRECTORY_SEPARATOR . 'Helpers' . DIRECTORY_SEPARATOR . 'DataRules' . DIRECTORY_SEPARATOR . $rule_file . \Tipui\Core::CORE_ENV_FILE_EXTENSION;
-			$path      = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . $rule_file;
+			$rule_file = 'Helpers' . DIRECTORY_SEPARATOR . 'DataRules' . DIRECTORY_SEPARATOR . ( ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule ) . \Tipui\Core::CORE_ENV_FILE_EXTENSION;
 
 			/**
-			* Clear the used vars
+			* App custom file (priority)
 			*/
-			//unset( $c, $core_data );
+			$path = TIPUI_APP_PATH . $rule_file;
 
-			/**
-			* Check if rule overriding exists
-			*/
 			if( !file_exists( $path ) )
 			{
 				/**
-				* Rule overriding not exists. 
-				* Loads from defaults.
+				* Overriding path
+				* Only for override framework buintin DataRules files
 				*/
-				$path = TIPUI_PATH . $rule_file;
+				$path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . 'Builtin' . DIRECTORY_SEPARATOR . $rule_file;
 
+				/**
+				* Check if rule overriding exists
+				*/
 				if( !file_exists( $path ) )
 				{
-					throw new \Exception('Data Rule "' . $rule . '" not found.');
+					/**
+					* Overriding file not exists. 
+					* Loads from defaults (core builtin), if exists too.
+					*/
+					$path = TIPUI_PATH . 'Builtin' . DIRECTORY_SEPARATOR . $rule_file;
+
+					if( !file_exists( $path ) )
+					{
+						throw new \Exception('Data Rule "' . $rule . '" not found.');
+					}
+
 				}
 			}
 
 			require_once( $path );
+
 			self::$rules[$rule] = $rs;
-			unset( $rs );
+			unset( $rs, $path, $rule_file );
 
 		}
-
-		unset( $rule_file, $path );
 
 		/**
 		* The rule's state.
@@ -79,6 +82,16 @@ class DataRules
 
 		return self::$rules[$rule];
 
+		/*
+		Recommend usage with Libs\Form
+		Form::SetField( [field name], [rule] );
+
+		[Samples]
+		Form::SetField( 'email', 'email' );
+
+		Calling from subfolders into DataRules folder (DataRules/Foo/email.php):
+		Form::SetField( 'email', 'Foo/email' );
+		*/
 	}
 
 }
