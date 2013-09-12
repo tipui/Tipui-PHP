@@ -19,10 +19,55 @@ class Form
 {
 
 	/**
+	* Handles form action
+	*/
+	protected static $action = null;
+
+	/**
 	* Handles form parameters
 	*/
-	public static $parameters = null;
+	protected static $parameters = null;
 
+
+	/**
+	* Sets form action parameter
+	*/
+	public static function SetAction( $action = false )
+	{
+		/**
+		* <form action="">
+		*/
+		self::$action = $action;
+	}
+
+	/**
+	* Gets form action parameter
+	*/
+	public static function GetAction()
+	{
+		/**
+		* <form action="">
+		*/
+		return self::$action;
+	}
+
+	/**
+	* Returns self $parameters property
+	*/
+	public static function GetParameter( $name = false )
+	{
+		if( !$name )
+		{
+			return self::$parameters;
+		}else{
+			if( isset( self::$parameters[$name] ) )
+			{
+				return self::$parameters[$name];
+			}else{
+				throw new \Exception('Parameter name "' . $name . '" not found.');
+			}
+		}
+	}
 
 	/**
 	* Sets form fields rules
@@ -33,6 +78,36 @@ class Form
 		* Creates parameter rules
 		*/
 		self::$parameters[$name] = DataRules::Get( $rule, $required );
+
+		/**
+		* Debug purposes
+		*/
+		//print_r( self::$parameters[$name] ); exit;
+	}
+
+	/**
+	* Sets form fields rules containing array of options (generaly used for radio or checkbox)
+	*/
+	public static function SetFieldMultiValue( $name, $rule, $options, $required = true )
+	{
+		/**
+		* Creates parameter rules
+		*/
+		self::SetField( $name, $rule, $required );
+		self::SetFieldProperty( $name, 'options', $options );
+
+		/**
+		* Debug purposes
+		*/
+		//print_r( self::$parameters[$name] ); exit;
+	}
+
+	/**
+	* Set property of an field
+	*/
+	public static function SetFieldProperty( $name, $property, $val )
+	{
+		self::$parameters[$name][$property] = $val;
 
 		/**
 		* Debug purposes
