@@ -8,12 +8,13 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-13 00:28:00
+* @updated: 2013-09-14 02:56:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML;
 
 use Tipui\Builtin\Libs as Libs;
+//use Tipui\Builtin\Helpers\HTML as HTML;
 
 class Form
 {
@@ -89,7 +90,7 @@ class Form
                 $arr['default']     = self::$parameter['default'][$k];
                 $arr['options']     = self::$parameter['options'][$k];
                 $arr['validation']  = self::$parameter['validation'];
-                $rs[] = self::InputType( $name . '[' . self::$parameter['names'][$k] . ']', $arr );
+                $rs[] = self::ElementAdd( $name . '[' . self::$parameter['names'][$k] . ']', $arr );
 				unset($arr);
             }
 
@@ -97,7 +98,7 @@ class Form
 			/**
 			* Single type
 			*/
-            $rs = self::InputType( $name, self::$parameter );
+            $rs = self::ElementAdd( $name, self::$parameter );
         }
 
 		/**
@@ -112,54 +113,11 @@ class Form
 
 	}
 
-	public static function InputType( $name, $property )
+	public static function ElementAdd( $name, $property )
     {
 
-        switch( $property['type'] )
-        {
-
-            case 'hidden':
-
-                return self::InputHidden( $name, $property );
-
-            break;
-            case 'text':
-            case 'password':
-
-                return self::InputText( $name, $property );
-
-            break;
-
-            case 'textarea':
-
-                return self::InputTextarea( $name, $property );
-
-            break;
-
-            case 'select':
-
-                return self::InputSelect( $name, $property );
-
-            break;
-            case 'radio':
-
-                return self::InputRadio( $name, $property );
-
-            break;
-            case 'checkbox':
-
-                return self::InputCheckbox( $name, $property );
-
-            break;
-            case 'file':
-
-                return self::InputFile( $name, $property );
-
-            break;
-
-        }
-
-        return null;
+		$c = '\Tipui\Builtin\Helpers\HTML\Form\\' . ucfirst( $property['type'] );
+		return $c::Add( $name, $property );
 
     }
 
@@ -204,457 +162,18 @@ class Form
 		self::$key_add = $key;
 	}
 
-	public static function InputText( $name, $property )
-    {
-		$rs  = '<input type="text"' . self::ParametersAdd() . 'name="' . $name;
-
-		/**
-		* name property
-		*/
-		if( self::$key_add )
-		{
-			if( !is_array( self::$key_add  ) )
-			{
-				$rs .= '[' . self::$key_add . ']';
-			}else{
-				foreach( self::$key_add as $k => $v )
-				{
-					$rs .= '[' . $v . ']';
-				}
-			}
-		}
-		
-		/**
-		* value property
-		*/
-		$rs .= '" value="';
-
-		if( !is_array( $property['value'] ) )
-		{
-			/**
-			* If value is empty, check for default property.
-			* Value must be filtered to avoid HTML injections.
-			*/
-			if( !empty( $property['value'] ) )
-			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
-			}else{
-				$rs .= $property['default'];
-			}
-		}else{
-			/**
-			* value is array
-			*/
-			throw new \Exception('Input text value as array not implemented');
-		}
-
-		/**
-		* size, maxLength, ExactLength properties
-		*/
-		$rs .= '" size="' . $property['size'] . '" maxLength="' . ( ( isset( $property['MaxLength'] ) ) ? $property['MaxLength'] : $property['ExactLength'] ) . '"';
-
-		/**
-		* class property
-		*/
-		if( self::$css_name != null )
-		{
-			$rs .= ' class="' . self::$css_name . '"';
-		}
-
-		/**
-		* readonly attribute
-		*/
-		if( self::$readonly )
-		{
-			$rs .= ' readonly';
-		}
-
-		$rs .= ' />';
-
-		return $rs;
-	}
-
-	public static function InputHidden( $name, $property )
+	/**
+	* Set property of an field
+	*/
+	public static function GetFieldProperty( $name, $property )
 	{
-
-		$rs  = '<input type="hidden"' . self::ParametersAdd() . 'name="' . $name;
+		return self::$parameter[$property];
 
 		/**
-		* name property
+		* Debug purposes
 		*/
-		if( self::$key_add )
-		{
-
-			if( !is_array( self::$key_add  ) )
-			{
-				$rs .= '[' . self::$key_add . ']';
-			}else{
-				foreach( self::$key_add as $k => $v )
-				{
-					$rs .= '[' . $v . ']';
-				}
-			}
-
-		}
-		
-		/**
-		* value property
-		*/
-		$rs .= '" value="';
-
-		if( !is_array( $property['value'] ) )
-		{
-
-			/**
-			* If value is empty, check for default property.
-			* For both, filter to avoid HTML injections.
-			*/
-			if( !empty( $property['value'] ) )
-			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
-
-			}else{
-				$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
-
-			}
-
-		}else{
-
-			/**
-			* Value is array
-			*/
-
-			if( self::$key_add )
-			{
-
-				self::$ArrayVal = '';
-				self::ArrayVal( $property['value'] );
-				
-				if( self::$ArrayVal == '' )
-				{
-					if( isset( $property['default'] ) )
-					{
-						$rs .= $property['default'];
-					}
-				}else{					
-					$rs .= Strings::Escape( self::$ArrayVal, 'quotes' );
-				}
-
-			}else{
-				$rs .= Strings::Escape( $property['default'], 'quotes' );
-
-			}
-
-		}
-
-		$rs .= '" />';
-
-		return $rs;
-
+		//print_r( self::$parameters[$name] ); exit;
 	}
-
-	public static function InputFile( $name, $property )
-    {
-
-		return '<input type="file"' . self::ParametersAdd() . 'name="' . $name . '" />';
-
-    }
-
-	public static function InputTextarea( $name, $property )
-    {
-		$rs  = '<textarea' . self::ParametersAdd() . 'name="' . $name;
-
-		/**
-		* name property
-		*/
-		if( self::$key_add )
-		{
-			if( !is_array( self::$key_add  ) )
-			{
-				$rs .= '[' . self::$key_add . ']';
-			}else{
-				foreach( self::$key_add as $k => $v )
-				{
-					$rs .= '[' . $v . ']';
-				}
-			}
-		}
-
-		$rs .= '" cols="' . $property['cols'] . '" rows="' . $property['rows'] . '"';
-
-		/**
-		* class property
-		*/
-		if( self::$css_name != null )
-		{
-			$rs .= ' class="' . self::$css_name . '"';
-		}
-
-		/**
-		* readonly attribute
-		*/
-		if( self::$readonly )
-		{
-			$rs .= ' readonly="readonly"';
-		}
-
-		$rs .= '>';
-
-		/**
-		* value field
-		*/
-		if( !is_array( $property['value'] ) )
-		{
-			/**
-			* If value is empty, check for default property.
-			*/
-			if( !empty( $property['value'] ) )
-			{
-				$rs .= $property['value'];
-
-			}else{
-				$rs .= $property['default'];
-
-			}
-		}else{
-
-			/**
-			* Value is array
-			*/
-
-			if( self::$key_add )
-			{
-
-				self::$ArrayVal = '';
-				self::ArrayVal( $property['value'] );
-				
-				if( self::$ArrayVal == '' )
-				{
-					if( isset( $property['default'] ) )
-					{
-						$rs .= $property['default'];
-					}
-				}else{					
-					$rs .= Strings::Escape( self::$ArrayVal, 'quotes' );
-				}
-
-			}else{
-				$rs .= Strings::Escape( $property['default'], 'quotes' );
-
-			}
-
-		}
-
-        $rs .= '</textarea>';
-
-        return $rs;
-    }
-
-	public static function InputRadio( $name, $property )
-    {
-
-		$rs = self::GroupingFieldOptionProperty( $name, $property );
-
-        return $rs;
-
-    }
-
-	public static function InputCheckbox( $name, $property )
-    {
-
-		if( isset( $property['options'] ) )
-		{
-			return self::GroupingFieldOptionProperty( $name, $property );
-		}
-
-		$rs  = '<input type="checkbox"' . self::ParametersAdd() . 'name="' . $name;
-
-		/**
-		* name property
-		*/
-		if( self::$key_add )
-		{
-
-			if( !is_array( self::$key_add  ) )
-			{
-				$rs .= '[' . self::$key_add . ']';
-			}else{
-				foreach( self::$key_add as $k => $v )
-				{
-					$rs .= '[' . $v . ']';
-				}
-			}
-
-		}
-
-		$rs .= '" value="';
-
-		/**
-		* value field
-		*/
-		if( !is_array( $property['value'] ) )
-		{
-			/**
-			* If value is empty, check for default property and ExactValue.
-			* For value, must be filtered to avoid HTML injections.
-			*/
-			if( !empty( $property['value'] ) )
-			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
-			}else if( !empty( $property['default'] ) ){
-				$rs .= $property['default'];
-			}else{
-				$rs .= $property['ExactValue'];
-			}
-		}else{
-
-			/**
-			* Value is array
-			*/
-			throw new \Exception('Checkbox value as array not implemented');
-
-		}
-
-		$rs .= '"';
-
-		/**
-		* Class property
-		*/
-		if( self::$css_name != null )
-		{
-			$rs .= ' class="' . self::$css_name . '"';
-		}
-
-		/**
-		* Checked state
-		*/
-        $check = false;
-
-		if( !empty( $property['value'] ) )
-		{
-			$rs .= ' checked';
-		}else if( !empty( $property['default'] ) )
-		{
-			$rs .= ' checked';
-		}
-
-		$rs .= ' />';
-
-        return $rs;
-
-    }
-
-
-    public static function InputSelect( $name, $property )
-    {
-
-		$rs  = '<select' . self::ParametersAdd() . 'name="' . $name;
-
-		/**
-		* name property
-		*/
-		if( self::$key_add )
-		{
-
-			if( !is_array( self::$key_add  ) )
-			{
-				$rs .= '[' . self::$key_add . ']';
-			}else{
-				foreach( self::$key_add as $k => $v )
-				{
-					$rs .= '[' . $v . ']';
-				}
-			}
-
-		}
-
-		$rs .= '"';
-
-		/**
-		* Class property
-		*/
-		if( self::$css_name != null )
-		{
-			$rs .= ' class="' . self::$css_name . '"';
-		}
-
-		$rs .= '>';
-
-		$check = false;
-
-		if( $property['value'] != '' )
-		{
-
-			$check = (string)$property['value'];
-			//echo gettype($check); exit;
-		}else{
-
-			if( $property['default'] )
-			{
-				$check = (string)$property['default'];
-			}
-
-		}
-
-		/**
-		* [review]
-		* Multiple selected options not available
-		*/
-		if( isset( $property['options'] ) and is_array($property['options']) and count($property['options']) > 0 )
-		{
-			//print_r($data['options']);
-			foreach( $property['options'] as $k => $v )
-			{
-				if( !is_array( $v ) )
-				{
-					$rs .= '<option';
-					$rs .= ' value="' . $k . '"';
-				}else{
-					if( isset( $v['optgroup'] ) )
-					{
-						$rs .= '<optgroup label="' . $v['optgroup']  . '">';
-					}
-				}
-
-				if( !is_array( $v ) and gettype($check) != 'boolean' and $check == $k )
-				{
-					$rs .= ' selected';
-				}
-
-				if( !is_array( $v ) )
-				{
-					$rs .= '>';
-					$rs .= $v;
-					$rs .= '</option>';
-				}else{
-					if( isset( $v['optgroup'] ) )
-					{
-						if( isset( $v['options'] ) and is_array( $v['options'] ) and count( $v['options'] ) > 0 )
-						{
-							foreach( $v['options'] as $k1 => $v1 )
-							{
-								$rs .= '<option';
-								$rs .= ' value="' . $k1 . '"';
-								if( gettype($check) != 'boolean' and $check == $k1 )
-								{
-									$rs .= ' selected';
-								}
-								$rs .= '>';
-								$rs .= $v1;
-								$rs .= '</option>';
-							}
-						}
-						$rs .= '</optgroup>';
-					}
-				}
-			}
-		}
-
-		$rs .= '</select>';
-
-        return $rs;
-
-    }
 
 	protected static function GroupingFieldOptionProperty( $name, $property )
     {
@@ -784,17 +303,4 @@ class Form
 
         return $rs;
     }
-
-	/**
-	* Set property of an field
-	*/
-	public static function GetFieldProperty( $name, $property )
-	{
-		return self::$parameter[$property];
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( self::$parameters[$name] ); exit;
-	}
 }

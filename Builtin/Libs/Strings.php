@@ -105,6 +105,7 @@ class Strings
                 return $rs;
             }
 
+			// [review]
             // atribui valores iguais aos índices, se $mode for diferente de "auto"
             foreach( $rs as $k => $v )
             {

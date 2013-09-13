@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-09 19:28:00
+* @updated: 2013-09-14 03:55:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -23,17 +23,6 @@ class Browse
 	* (array) Holds the server and client headers
 	*/
 	private $data;
-
-	/**
-	* Initiates general settings
-	*/
-    public function __construct()
-	{
-
-		$this -> GetData();
-
-        return null;
-    }
 
 	/**
 	* Get header information
@@ -54,9 +43,9 @@ class Browse
 		$this -> data['PageNext']              = false;
 		$this -> data['PagePrevious']          = false;
 
-		$this -> data['REMOTE_ADDR']           = $rnifo['IP']; //$_SERVER['REMOTE_ADDR'];
+		$this -> data['REMOTE_ADDR']           = $rnifo['REMOTE_ADDR']; //$_SERVER['REMOTE_ADDR'];
 		$this -> data['REMOTE_HOST_BY_ADDR']   = $rnifo['REMOTE_HOST_BY_ADDR'];
-		$this -> data['REMOTE_PROXY']          = $rnifo['PROXY'];
+		$this -> data['REMOTE_PROXY']          = $rnifo['REMOTE_PROXY'];
 		$this -> data['REMOTE_PORT']           = $_SERVER['REMOTE_PORT'];
 
 		$this -> data['HTTP_REFERER']          = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] : '';
@@ -85,7 +74,7 @@ class Browse
 	/**
 	* Get IP, Proxy
 	*/
-    public  static function GetRemoteInfo()
+    public static function GetRemoteInfo()
 	{
 
 		$proxy = '';
@@ -119,9 +108,9 @@ class Browse
 		}
 
 		return array(
-					'IP'                   => $ip,
+					'REMOTE_ADDR'          => $ip,
 					'REMOTE_HOST_BY_ADDR'  => @gethostbyaddr( $ip ),
-					'PROXY'                => $proxy
+					'REMOTE_PROXY'         => $proxy
 					);
     }
 }

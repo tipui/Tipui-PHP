@@ -31,7 +31,7 @@ class DataRules
 
 			/**
 			* Converting the $rule string slashes.
-			* If the Operational System of enviroment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
+			* If the Operational System of environment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
 			*/
 			$rule_file = 'Helpers' . DIRECTORY_SEPARATOR . 'DataRules' . DIRECTORY_SEPARATOR . ( ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule ) . \Tipui\Core::CORE_ENV_FILE_EXTENSION;
 
@@ -44,7 +44,7 @@ class DataRules
 			{
 				/**
 				* Overriding path
-				* Only for override framework buintin DataRules files
+				* Only for override framework builtin DataRules files
 				*/
 				$path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . 'Builtin' . DIRECTORY_SEPARATOR . $rule_file;
 
@@ -89,7 +89,7 @@ class DataRules
 		[Samples]
 		Form::SetField( 'email', 'email' );
 
-		Calling from subfolders into DataRules folder (DataRules/Foo/email.php):
+		Calling from subfolders in DataRules folder (DataRules/Foo/email.php):
 		Form::SetField( 'email', 'Foo/email' );
 		*/
 	}
