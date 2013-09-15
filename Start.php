@@ -102,7 +102,6 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Get environment settings
 	*/
-	// IMPORTANT. Check to not rewrite existing cache files
 	$env_bootstrap = $c -> GetEnv( 'BOOTSTRAP' );
 	$env_templates = $c -> GetEnv( 'TEMPLATES' );
 

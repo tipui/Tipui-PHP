@@ -30,8 +30,8 @@ class Cookie
 	* [/code]
 	* [code]
 	* // Set custom cookie parameters
-	* $env_bootstrap = \Tipui\FW::GetCoreDataCache( 'GetENV', 'BOOTSTRAP' );
-	* $env_cookies   = \Tipui\FW::GetCoreDataCache( 'GetENV', 'COOKIES' );
+	* $env_bootstrap = \Tipui\Core::GetEnv( 'BOOTSTRAP' );
+	* $env_cookies   = \Tipui\Core::GetEnv( 'COOKIES' );
 	* $c1 = new Cookie( 20, 'days', $env_bootstrap['DOMAIN'], $env_bootstrap['SUBDOMAIN'] );
 	* $c2 = new Cookie( $env_cookies['COOKIE_TIME'], $env_cookies['COOKIE_TIME_MODE'], $env_bootstrap['DOMAIN'], $env_bootstrap['SUBDOMAIN'] );
 	* [/code]

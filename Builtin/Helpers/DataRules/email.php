@@ -8,6 +8,6 @@ $rs = array (
 	'validation'     => 'email',
 	'value'          => '',
 	'default'        => '',
-	'pre-filter'     => array( array( 'Strings', 'Escape' ), array( array( 'php', 'form', 'script', 'headers', 'trim' ) ) ),					
+	'pre-filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( array( 'php', 'form', 'script', 'headers', 'trim' ) ) ),					
 );
 ?>

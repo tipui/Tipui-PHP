@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-08 17:35:00
+* @updated: 2013-09-15 18:01:00
 */
 
 namespace Tipui;
@@ -68,6 +68,21 @@ class Core
 	const CORE_ENV_FILE_EXTENSION = '.php';
 
 	/**
+	* The static method that calls Core->GetEnv()
+	*/
+	const CONF_CALLER = 'Tipui\Core::GetConf';
+
+	/**
+	* Stores the current object that is calling the Core.
+	*/
+	private $called_from;
+
+	/**
+	* Handles the parameters for [code]GetEnv[/code] method called from [code]self::CONF_CALLER[/code].
+	*/
+	private $called_getenv;
+
+	/**
 	* Initiates properties
 	*/
     public function __construct()
@@ -87,6 +102,40 @@ class Core
 		* Defines Storage path for environment data cache files.
 		*/
 		$this -> cache_storage_env_dir = TIPUI_APP_PATH . 'Storage' . DIRECTORY_SEPARATOR . 'env' . DIRECTORY_SEPARATOR;
+
+
+		/**
+		* Retrieves the internal backtrace.
+		*/
+		$trace = debug_backtrace();
+
+		/**
+		* Debug purposes
+		*/
+		//print_r( $trace ); exit;
+
+		/**
+		* Identifies who called the Core instance.
+		*/
+		if( isset( $trace[1]['class'] ) and isset( $trace[1]['function'] ) )
+		{
+			/**
+			* Resetting the parameters for [code]GetEnv[/code] method.
+			*/
+			$this -> called_getenv = null;
+
+			/**
+			* [review] Implement something to disable instantiates from disallowed places. Directly from templates, for example.
+			* Stores the current object that is calling the Core.
+			*/
+			$this -> called_from = $trace[1]['class'] . '::' . $trace[1]['function'];
+		}
+
+		/**
+		* Clear used var.
+		*/
+		unset( $trace );
+
 
 		return null;
 
@@ -119,6 +168,75 @@ class Core
 		$this -> session = null;
 
 		return null;
+	}
+
+	/**
+	* PHP Magic method. Get property if exists.
+	* Undeclared property can be called without cause PHP fatal errors.
+	* This allow us to do some "tricks", like PHP fluent access.
+	*/
+	public function __get($key)
+	{
+		/**
+		* Debug purposes
+		*/
+		//echo __NAMESPACE__ ; exit;
+		//echo $this -> called_from . '->' . $key; exit;
+
+		/**
+		* Execute only if is called from static "alias" method [code]self::CONF_CALLER[/code].
+		*/
+		if( $this -> called_from == self::CONF_CALLER )
+		{
+			/**
+			* Debug purposes
+			*/
+			//echo $key;
+
+			/**
+			* Registering the parameters for [code]GetEnv[/code] method.
+			*/
+			$this -> called_getenv[] = $key;
+
+			/**
+			* If array have only 1 index, means that the second parameter for [code]GetEnv[/code] is not present.
+			*/
+			if( count( $this -> called_getenv ) == 1 )
+			{
+				return $this -> GetEnv( $key );
+			}else{
+				/**
+				* Detected the second parameter for [code]GetEnv[/code] method.
+				*/
+				return $this -> GetEnv( $this -> called_getenv[0], ( isset( $this -> called_getenv[1] ) ? $key : false ) );
+			}
+		}
+
+	}
+
+	/**
+	* Calls Core as static chained in fluent way.
+	*
+	* Alternative way:
+	* [code]
+	* $c = new Core;
+	* $c -> GetEnv( 'URL','FORM_ACTION' );
+	* [code]
+	* @see Core::GetEnv()
+	*
+	* [usage sample]
+	* Returns entire array
+	* [code]print_r( Core::GetConf()->URL->_all );[/code]
+	* Returns array index
+	* [code]echo PHP_EOL . Core::GetConf()->URL->FORM_ACTION;[/code]
+	* Returns array index
+	* [code]echo PHP_EOL . Core::GetConf()->BOOTSTRAP->DOMAIN;[/code]
+	* Returns array index
+	* [code]echo PHP_EOL . Core::GetConf()->TEMPLATES->FOLDER;[/code]
+	*/
+	public static function GetConf()
+	{
+		return new Core;
 	}
 
 	/**
@@ -290,6 +408,16 @@ class Core
 
 	/**
 	* Gets Core data in cache files (json format)
+	*
+	* [Usage sample]
+	* [code]
+	* $c = new Core;
+	* $c -> GetEnv( 'URL','FORM_ACTION' );
+	* [code]
+	*
+	* Alternative way:
+	* [code]echo Core::GetConf()->URL->FORM_ACTION;[/code]
+	* @see Core::GetConf()
 	*/
     public function GetENV( $index, $subindex = false )
     {
@@ -302,10 +430,48 @@ class Core
 			$this -> fs = new Libs\FileSystem;
 		}
 
-		$this -> core_cached_data[$index] = json_decode( $this -> fs -> ReadFile( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ), true );
-
+		/**
+		* Check if cache file exists.
+		*/
 		if( $this -> fs -> FileExists( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ) )
 		{
+
+			/**
+			* Loads from cached file.
+			*/
+			$this -> core_cached_data[$index] = json_decode( $this -> fs -> ReadFile( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ), true );
+
+
+			/**
+			* PHP fluent
+			* Execute only if is called from static "alias" method [code]self::CONF_CALLER[/code]
+			*/
+			if( $this -> called_from == self::CONF_CALLER )
+			{
+				/**
+				* The subindex [code]$subindex == '_all'[/code] is reserved, used to return entire array of [code]$index[/code]
+				*/
+				if( $subindex == '_all' )
+				{
+					return $this -> core_cached_data[$index];
+				}else if( !$subindex ){
+					/**
+					* the [code]$subindex[/code] if false and is not equal to '_all', then, return the object context.
+					*/
+					return $this;
+				}else{
+					/**
+					* Returns index and subindex value
+					*/
+					return $this -> core_cached_data[$index][$subindex];
+				}
+
+				return null;
+			}
+
+			/**
+			* Non fluent
+			*/
 			if( !$subindex )
 			{
 				/**

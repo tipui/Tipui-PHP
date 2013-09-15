@@ -58,7 +58,7 @@ class Checkbox extends \Tipui\Builtin\Helpers\HTML\Form
 			*/
 			if( !empty( $property['value'] ) )
 			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
+				$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( $property['value'], 'quotes' );
 			}else if( !empty( $property['default'] ) ){
 				$rs .= $property['default'];
 			}else{

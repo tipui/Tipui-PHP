@@ -93,11 +93,11 @@ class Textarea extends \Tipui\Builtin\Helpers\HTML\Form
 						$rs .= $property['default'];
 					}
 				}else{					
-					$rs .= Strings::Escape( self::$ArrayVal, 'quotes' );
+					$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( self::$ArrayVal, 'quotes' );
 				}
 
 			}else{
-				$rs .= Strings::Escape( $property['default'], 'quotes' );
+				$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( $property['default'], 'quotes' );
 
 			}
 

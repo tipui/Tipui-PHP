@@ -105,7 +105,7 @@ class Form
 	/**
 	* Set property of an field
 	*/
-	public static function SetFieldProperty( $name, $property, $val )
+	protected static function SetFieldProperty( $name, $property, $val )
 	{
 		self::$parameters[$name][$property] = $val;
 
@@ -118,7 +118,7 @@ class Form
 	/**
 	* Gets form field
 	*/
-	public static function GetField( $name = false, $property = false )
+	protected static function GetField( $name = false, $property = false )
 	{
 
 		/**

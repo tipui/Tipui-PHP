@@ -13,6 +13,8 @@
 
 namespace Tipui\Builtin\Libs;
 
+use Tipui\Builtin\Libs\Strings as Strings;
+
 class Request
 {
 
@@ -285,7 +287,7 @@ class Request
 
 			// Must check if app index.php file is running under subfolder to avoid conflicts with parameters and the folder base
 			//$this -> url_href_base = '/new/';
-			$url_href_base_length = Strings::StrLen( $this -> url_href_base );
+			$url_href_base_length = Strings::Method( 'StrLen' ) -> Exec( $this -> url_href_base );
 			if( $url_href_base_length > 1 )
 			{
 				// if lengh is more than 1, means that app is using subfolder
@@ -293,7 +295,7 @@ class Request
 			}
 
 			// if remains any string, assign them to $this -> uri as array
-			if( Strings::StrLen( $this -> request_uri ) > 0 )
+			if( Strings::Method( 'StrLen' ) -> Exec( $this -> request_uri ) > 0 )
 			{
 				$this -> uri = explode( $this -> url_pfs, $this -> request_uri );
 				if( $url_href_base_length == 1 )
