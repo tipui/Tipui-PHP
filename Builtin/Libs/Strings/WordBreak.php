@@ -28,7 +28,7 @@ class WordBreak
 		$str = mb_ereg_replace('#(\S{' . $limit . ',})#e', "chunk_split('$1', " . $limit . ", '" . $break . "')", $str );
 		if( $escape )
 		{
-			return Libs\Strings::Method( 'Escape' ) -> Exec( $str, false );
+			return Libs\Strings::Escape( $str, false );
 		}
 		return $str;
     }

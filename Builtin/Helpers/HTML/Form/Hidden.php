@@ -55,11 +55,11 @@ class Hidden extends \Tipui\Builtin\Helpers\HTML\Form
 			*/
 			if( !empty( $property['value'] ) )
 			{
-				$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( $property['value'], 'quotes' );
+				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
 
 			}else{
 				//$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
-				$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( $property['default'], 'quotes' );
+				$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
 
 			}
 
@@ -82,11 +82,11 @@ class Hidden extends \Tipui\Builtin\Helpers\HTML\Form
 						$rs .= $property['default'];
 					}
 				}else{					
-					$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( self::$ArrayVal, 'quotes' );
+					$rs .= Libs\Strings::Escape( self::$ArrayVal, 'quotes' );
 				}
 
 			}else{
-				$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( $property['default'], 'quotes' );
+				$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
 
 			}
 

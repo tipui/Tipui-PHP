@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-12 13:30:00
+* @updated: 2013-09-17 01:25:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -33,7 +33,7 @@ class DataRules
 			* Converting the $rule string slashes.
 			* If the Operational System of environment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
 			*/
-			$rule_file = 'Helpers' . DIRECTORY_SEPARATOR . 'DataRules' . DIRECTORY_SEPARATOR . ( ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule ) . \Tipui\Core::CORE_ENV_FILE_EXTENSION;
+			$rule_file = \Tipui\Core::ENV_FOLDER_HELPERS . DIRECTORY_SEPARATOR . \Tipui\Core::ENV_FOLDER_DATARULES . DIRECTORY_SEPARATOR . ( ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule ) . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 			/**
 			* App custom file (priority)
@@ -42,11 +42,14 @@ class DataRules
 
 			if( !file_exists( $path ) )
 			{
+
+				$folder_builtin = \Tipui\Core::ENV_FOLDER_BUILTIN;
+
 				/**
 				* Overriding path
 				* Only for override framework builtin DataRules files
 				*/
-				$path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . 'Builtin' . DIRECTORY_SEPARATOR . $rule_file;
+				$path = TIPUI_APP_PATH . TIPUI_FOLDER_OVERRIDE . DIRECTORY_SEPARATOR . $folder_builtin . DIRECTORY_SEPARATOR . $rule_file;
 
 				/**
 				* Check if rule overriding exists
@@ -57,13 +60,12 @@ class DataRules
 					* Overriding file not exists. 
 					* Loads from defaults (core builtin), if exists too.
 					*/
-					$path = TIPUI_PATH . 'Builtin' . DIRECTORY_SEPARATOR . $rule_file;
+					$path = TIPUI_PATH . $folder_builtin . DIRECTORY_SEPARATOR . $rule_file;
 
 					if( !file_exists( $path ) )
 					{
 						throw new \Exception('Data Rule "' . $rule . '" not found.');
 					}
-
 				}
 			}
 

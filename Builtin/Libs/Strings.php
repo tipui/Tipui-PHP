@@ -8,22 +8,40 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-09 19:28:00
+* @updated: 2013-09-16 03:56:00
 */
 
 namespace Tipui\Builtin\Libs;
 
-use Tipui\Builtin\Libs as Libs;
-
+/**
+* Strings manipulation classes
+*/
 class Strings
 {
 
-    public static function Method( $name )
-	{
+	/**
+	* Instance.
+	*
+	* sample
+	* [code]
+	* $c = new Strings;
+	* $c -> Trim( ' foo ' );
+	* [/code]
+	*/
+    public function __call( $name, $arguments )
+    {
+		return Factory::Exec( 'Strings', $name, $arguments );
+    }
 
-		require_once( 'Strings/' . $name . '.php' );
-		$c = '\Tipui\Builtin\Libs\Strings\\' . $name;
-		return new $c;
-	}
+	/**
+	* Statically.
+	*
+	* sample
+	* [code]Strings::Trim( ' foo ' );[/code]
+	*/
+    public static function __callStatic( $name, $arguments )
+    {
+		return Factory::Exec( 'Strings', $name, $arguments );
+    }
 
 }

@@ -13,15 +13,49 @@
 
 namespace Tipui\Builtin\Libs;
 
+/**
+* Session library.
+*/
 class Session
 {
 
-    private $data;
-    private $exists;
-
-    public function __construct()
+	/**
+	* Instance.
+	*
+	* sample
+	* [code]
+	* $c = new Session;
+	* $c -> Set( 'foo', 'bar' );
+	* [/code]
+	*/
+    public function __call( $name, $arguments )
     {
-		$this -> ResetProperties();
+		self::StartCheck();
+		return Factory::Exec( 'Session', $name, $arguments );
+    }
+
+	/**
+	* Statically.
+	*
+	* sample
+	* [code]Session::Set( 'foo', 'bar' );[/code]
+	*/
+    public static function __callStatic( $name, $arguments )
+    {
+		self::StartCheck();
+		return Factory::Exec( 'Session', $name, $arguments );
+    }
+
+	/**
+	* Check if session_id() is started.
+	*
+	*/
+    protected function StartCheck()
+    {
+		/**
+		* Debug purposes
+		*/
+		//echo time() . PHP_EOL;
 
 		/**
 		* If session_id is empty, means that session was not started.
@@ -32,103 +66,15 @@ class Session
         }
     }
 
-    public function __destruct()
-    {
-		$this -> ResetProperties();
-	}
-
-    private function ResetProperties()
-    {
-		$this -> data   = false;
-		$this -> exists = false;
-	}
-
-    public function Exists( $key, $value )
-    {
-		return !$this -> exists ? $this -> exists : $this -> data;
-	}
-
-    public function Set( $key, $value )
-    {
-        $_SESSION[$key] = $value;
-        return null;
-    }
-
 	/**
-	* Get the value of array key.
-	* If the key is false, returns entire array.
+	* Debug purposes
+	* [review] StartCheck() to construct and execute from static
 	*/
-    public function Get( $key = false )
+	/*
+    public function __construct()
     {
-
-        if( $key )
-        {
-
-			/**
-			* Returns single key of array, if exists.
-			*/
-            if( isset( $_SESSION[$key] ) )
-            {
-
-                $this -> data   = $_SESSION[$key];
-                $this -> exists = true;
-
-            }else{
-
-                $this -> exists = false;
-            }
-
-        }else{
-
-			/**
-			* Returns entire array if exists.
-			*/
-            if( isset( $_SESSION ) )
-            {
-                $this -> data = $_SESSION;
-                $this -> exists = true;
-            }else{
-                $this -> exists = false;
-            }
-
-        }
-
-        return $this -> data;
-
-    }
-
-	/**
-	* Unset a single array key or entire array if key is false
+		echo time() . PHP_EOL;
+	}
 	*/
-    public function Del( $key = false )
-    {
-
-        if( $key )
-        {
-            if( isset( $_SESSION[$key] ) )
-            {
-                unset( $_SESSION[$key] );
-            }
-
-        }else{
-            // unset entire array
-            foreach( $_SESSION as $k => $v )
-            {
-                unset( $_SESSION[$k] );
-            }
-
-        }
-
-        return null;
-
-    }
-
-    public function Destroy()
-    {
-        if( session_id() != '' )
-        {
-            session_destroy();
-        }
-    }
 
 }

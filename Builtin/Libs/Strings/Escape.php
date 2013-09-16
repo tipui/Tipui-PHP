@@ -35,12 +35,12 @@ class Escape
 		{
 			if( !$escape or in_array( 'strip_tags', $escape ) )
 			{
-				$str = Libs\Strings::Method( 'StripTags' ) -> Exec( $str, $exceptions );
+				$str = Libs\Strings::StripTags( $str, $exceptions );
 			}
 
 			if( !$escape or in_array( 'trim', $escape ) )
 			{
-				$str = Libs\Strings::Method( 'Trim' ) -> Exec( $str );
+				$str = Libs\Strings::Trim( $str );
 			}
 
 			if( !$escape or in_array( 'php', $escape ) )
@@ -94,10 +94,10 @@ class Escape
 
 		/**
 		* [usage]
-			Libs\Strings::Method( 'Escape' ) -> Exec( 'foo bar', array( 'php', 'form' ) );
-			Libs\Strings::Method( 'Escape' ) -> Exec( 'foo bar', array( 'php' ) );
-			Libs\Strings::Method( 'Escape' ) -> Exec( 'foo bar', array( 'php', 'form', 'strip_tags' ) );
-			Libs\Strings::Method( 'Escape' ) -> Exec( 'foo bar', false ); // apply all filters
+			Libs\Strings::Escape( 'foo bar', array( 'php', 'form' ) );
+			Libs\Strings::Escape( 'foo bar', array( 'php' ) );
+			Libs\Strings::Escape( 'foo bar', array( 'php', 'form', 'strip_tags' ) );
+			Libs\Strings::Escape( 'foo bar', false ); // apply all filters
 		*/
     }
 

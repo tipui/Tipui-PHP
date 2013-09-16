@@ -15,6 +15,9 @@ namespace Tipui\Builtin\Libs;
 
 use \Tipui\Builtin\Libs\DataRules as DataRules;
 
+/** [review]
+* Form properties and settings.
+*/
 class Form
 {
 

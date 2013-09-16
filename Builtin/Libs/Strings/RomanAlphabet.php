@@ -24,7 +24,7 @@ class RomanAlphabet
 	*/
 	public function Exec( $mode = 'auto' )
 	{
-		return Libs\Strings::Method( 'ParseRange' ) -> Exec( 'A', 'Z', $mode );
+		return Libs\Strings::ParseRange( 'A', 'Z', $mode );
     }
 
 }

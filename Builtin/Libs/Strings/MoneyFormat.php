@@ -24,7 +24,7 @@ class MoneyFormat
 	public function Exec( $str, $decimal_places = false )
 	{
 
-		$str = Libs\Strings::Method( 'NumbersOnly' ) -> Exec( $str );
+		$str = Libs\Strings::NumbersOnly( $str );
 
         if( !empty( $str ) )
 		{
@@ -38,9 +38,9 @@ class MoneyFormat
 		*@see http://php.net/number_format
 
 		* [usage]
-		* echo Libs\Strings::Method( 'MoneyFormat' ) -> Exec( 1000, true );
+		* echo Libs\Strings::MoneyFormat( 1000, true );
 		* //returns 1000,00
-		* echo Libs\Strings::Method( 'MoneyFormat' ) -> Exec( 1000 );
+		* echo Libs\Strings::MoneyFormat( 1000 );
 		* //returns 1000
 		*/
 

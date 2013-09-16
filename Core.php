@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-15 18:01:00
+* @updated: 2013-09-17 01:24:00
 */
 
 namespace Tipui;
@@ -58,14 +58,34 @@ class Core
 	private $core_methods_cached_data;
 
 	/**
-	* Core data cache file name extension.
+	* Builtin folder name
 	*/
-	const CORE_CACHE_FILE_EXTENSION = '.json';
+	const ENV_FOLDER_BUILTIN = 'Builtin';
 
 	/**
-	* PHP scripts files names extension.
+	* Configuration environment files folder name
 	*/
-	const CORE_ENV_FILE_EXTENSION = '.php';
+	const CONF_FOLDER_ENV = 'env';
+
+	/**
+	* DataRules folder name
+	*/
+	const ENV_FOLDER_DATARULES = 'DataRules';
+
+	/**
+	* Storage folder name
+	*/
+	const STORAGE_FOLDER = 'Storage';
+
+	/**
+	* Helpers folder name
+	*/
+	const ENV_FOLDER_HELPERS = 'Helpers';
+
+	/**
+	* Core data cache file name extension.
+	*/
+	const CACHE_FILE_EXTENSION = '.json';
 
 	/**
 	* The static method that calls Core->GetEnv()
@@ -101,7 +121,7 @@ class Core
 		/**
 		* Defines Storage path for environment data cache files.
 		*/
-		$this -> cache_storage_env_dir = TIPUI_APP_PATH . 'Storage' . DIRECTORY_SEPARATOR . 'env' . DIRECTORY_SEPARATOR;
+		$this -> cache_storage_env_dir = TIPUI_APP_PATH . self::STORAGE_FOLDER . DIRECTORY_SEPARATOR . self::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR;
 
 
 		/**
@@ -266,7 +286,7 @@ class Core
 		/**
 		* Gets the environment settings from the main file ENV.json
 		*/
-		$env_json = json_decode( file_get_contents( $app_conf_path . 'env' . DIRECTORY_SEPARATOR . 'ENV.json' ), true );
+		$env_json = json_decode( file_get_contents( $app_conf_path . self::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR . 'ENV.json' ), true );
 
 		/**
 		* Debug purposes
@@ -283,7 +303,7 @@ class Core
 		* If exists, interrupt execution of this method.
 		* 
 		*/		
-		if( !$env_json['CACHE_REGENERATE'] and $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CORE_CACHE_FILE_EXTENSION ) )
+		if( !$env_json['CACHE_REGENERATE'] and $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CACHE_FILE_EXTENSION ) )
 		{
 	
 			$this -> env['URL']     = $this -> GetEnv( 'URL' );
@@ -310,7 +330,7 @@ class Core
 				'PRODUCTION'       => $env_json['PRODUCTION'],
 				'DEV'              => $env_json['DEV'],
 				'NAME'             => $env_name,
-				'PATH'             => $app_conf_path . 'env' . DIRECTORY_SEPARATOR . $env_name . DIRECTORY_SEPARATOR,
+				'PATH'             => $app_conf_path . self::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR . $env_name . DIRECTORY_SEPARATOR,
 		);
 
 		/**
@@ -333,7 +353,7 @@ class Core
 		*/
 		foreach( $env_files as $v )
 		{
-			require_once( $env['PATH'] . $v . self::CORE_ENV_FILE_EXTENSION );
+			require_once( $env['PATH'] . $v . TIPUI_CORE_ENV_FILE_EXTENSION );
 			$this -> SetENV( $v, $array );
 		}
 		
@@ -362,12 +382,12 @@ class Core
 		/**
 		* Subfolder and name of Autoloader file.
 		*/
-		$file = 'Builtin' .  DIRECTORY_SEPARATOR . 'Autoloader' . self::CORE_ENV_FILE_EXTENSION;
+		$file = self::ENV_FOLDER_BUILTIN .  DIRECTORY_SEPARATOR . 'Autoloader' . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 		/**
 		* Path of override file.
 		*/
-		$path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . $file;
+		$path = TIPUI_APP_PATH . TIPUI_FOLDER_OVERRIDE . DIRECTORY_SEPARATOR . $file;
 
 		/**
 		* Check if override path exists.
@@ -402,7 +422,7 @@ class Core
     private function SetENV( $index, $value )
     {
 		$this -> env[ $index ] = $value;
-		$this -> fs -> WriteFile( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION, json_encode( $value ) );
+		$this -> fs -> WriteFile( $this -> cache_storage_env_dir . $index . self::CACHE_FILE_EXTENSION, json_encode( $value ) );
 		return null;
 	}
 
@@ -433,13 +453,13 @@ class Core
 		/**
 		* Check if cache file exists.
 		*/
-		if( $this -> fs -> FileExists( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ) )
+		if( $this -> fs -> FileExists( $this -> cache_storage_env_dir . $index . self::CACHE_FILE_EXTENSION ) )
 		{
 
 			/**
 			* Loads from cached file.
 			*/
-			$this -> core_cached_data[$index] = json_decode( $this -> fs -> ReadFile( $this -> cache_storage_env_dir . $index . self::CORE_CACHE_FILE_EXTENSION ), true );
+			$this -> core_cached_data[$index] = json_decode( $this -> fs -> ReadFile( $this -> cache_storage_env_dir . $index . self::CACHE_FILE_EXTENSION ), true );
 
 
 			/**
@@ -544,19 +564,18 @@ class Core
 		*/
 
 		$c = new Builtin\Libs\Request;
+		$c -> SetDefaults();
 		$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
 		$c -> SetSapiMode( $this -> IsCliMode() );
 		$c -> SetURLParts( $this -> env['URL']['HREF_BASE'] );
-
 		/**
 		* Debug purposes
 		*/
+		//echo time(); exit;
 		//echo $c -> GetMethod(); exit;
 		//print_r( $c -> Extract() ); exit;
 
 		/**
-		* Stores to core data cache
-		*
 		* Applying urldecode() to support multibyte strings from URL
 		* example http://localhost/ダミー
 		*/
@@ -680,7 +699,7 @@ class Core
 			if( $path_base == 'Model' )
 			{
 
-				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . self::CORE_ENV_FILE_EXTENSION;
+				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 				/**
 				* Debug purposes
@@ -720,7 +739,7 @@ class Core
 					//echo 'ok';
 					//print_r( $rs ); exit;
 					$goal       = true;
-					$rs['path'] = TIPUI_APP_PATH . 'Model' . DIRECTORY_SEPARATOR . str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $rs['class'] ) . self::CORE_ENV_FILE_EXTENSION;
+					$rs['path'] = TIPUI_APP_PATH . 'Model' . DIRECTORY_SEPARATOR . str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $rs['class'] ) . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 					if( !file_exists( $rs['path'] ) )
 					{
@@ -771,10 +790,33 @@ class Core
 		/**
 		* Get from session.
 		*/
-		$this -> core_methods_cached_data[$method] = $this -> session -> Get( 'Tipui::Core::' . $method );
+		$rs = $this -> session -> Get( 'Tipui::Core::' . $method );
 
-		if( isset( $this -> core_methods_cached_data[$method] ) )
+		/**
+		* Debug purposes
+		*/
+		/*
+		if( !isset( $rs -> invalid_key ) )
 		{
+			echo 22;
+		}else{
+			echo 23;
+		}
+		exit;
+		*/
+
+		/**
+		* Clear variable
+		*/
+		unset( $rs );
+
+		/**
+		* If is valid session array key
+		*/
+		if( !isset( $rs -> invalid_key ) )
+		{
+
+			$this -> core_methods_cached_data[$method] = $this -> session -> Get( 'Tipui::Core::' . $method );
 
 			if( !$instance )
 			{

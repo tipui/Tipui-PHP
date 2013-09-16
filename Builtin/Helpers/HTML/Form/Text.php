@@ -51,7 +51,7 @@ class Text extends \Tipui\Builtin\Helpers\HTML\Form
 			*/
 			if( !empty( $property['value'] ) )
 			{
-				$rs .= Libs\Strings::Method( 'Escape' ) -> Exec( $property['value'], 'quotes' );
+				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
 			}else{
 				$rs .= $property['default'];
 			}

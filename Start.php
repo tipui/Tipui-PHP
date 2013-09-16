@@ -1,15 +1,16 @@
 <?php
 
 /**
-* @class  FW
-* @file   Tipui.php
-* @brief  Engine's start.
+* @file   Start.php
+* @brief  Engine's start in procedural style.
 * @date   2013-09-08 17:10:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-08 17:35:00
+* @updated: 2013-09-17 01:25:00
 */
+
+use Tipui\Builtin\Libs as Libs;
 
 // Run once time
 if( !defined( 'TIPUI_PATH' ) )
@@ -21,11 +22,14 @@ if( !defined( 'TIPUI_PATH' ) )
 	// Framework base path
 	define( 'TIPUI_PATH', dirname( __FILE__ ) . DIRECTORY_SEPARATOR );
 
-	// Builtin base path [[deprecated]
-	//define( 'TIPUI_BUILTIN_PATH', TIPUI_PATH . 'Builtin' . DIRECTORY_SEPARATOR );
-
 	// public path, where the index.php is located
 	define( 'TIPUI_APP_PUBLIC_PATH', dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR );
+
+	// PHP scripts files name extension
+	define( 'TIPUI_CORE_ENV_FILE_EXTENSION', '.php' );
+
+	// Override folder name
+	define( 'TIPUI_FOLDER_OVERRIDE', 'Override' );
 
 	/**
 	* @brief config files, models, templates, plugins, helpers, extra libs
@@ -60,7 +64,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Path to overriding Core file.
 	*/
-	$file = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR . 'Core.php';
+	$file = TIPUI_APP_PATH . TIPUI_FOLDER_OVERRIDE . DIRECTORY_SEPARATOR . 'Core.php';
 
 	/**
 	* Check if override file exists.
@@ -188,24 +192,46 @@ if( !defined( 'TIPUI_PATH' ) )
 		if( method_exists( $clss, 'Header' ) )
 		{
 			$module_header = $m -> Header();
-			\Tipui\Builtin\Libs\Header::HTTPStatus( $module_header['http_status'] );
+			Libs\Header::HTTPStatus( $module_header['http_status'] );
 			unset( $module_header );
 		}
 
 		// Call Template library
 		/**
+		* [review]
 		* Defined in Routing Modules file, however, not implemented
 		* Must decide where will have priority. The Routing alias module settings or the Template method of module.
 		$module['force_language']
 		$module['default_language']
 		*/
-		$t = new \Tipui\Builtin\Libs\Template( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $module_template['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $module_template['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+
+		/**
+		* Call as instance
+		*/
+		//$t = new Libs\Template;
+		//$t -> Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $module_template['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $module_template['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+
+		/**
+		* Call statically
+		*/
+		Libs\Template::Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $module_template['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $module_template['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
 		//Output's content-type
 		header( 'Content-Type: ' . ( !isset( $module_template['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $module_template['content_type'] ) . '; charset=' . ( !isset( $module_template['charset'] ) ? $env_bootstrap['CHARSET'] : $module_template['charset'] ) );
 
-		// Rendering and dispatching the template
-		$t -> Compile( $m -> View(), ( !isset( $module_template['dir'] ) ? false : $module_template['dir'] ), ( !isset( $module_template['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $module_template['file'] ) );
+		/**
+		* Rendering and dispatching the template
+		*/
+
+		/**
+		* Call as instance
+		*/
+		//$t -> Compile( $m -> View(), ( !isset( $module_template['dir'] ) ? false : $module_template['dir'] ), ( !isset( $module_template['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $module_template['file'] ) );
+
+		/**
+		* Call statically
+		*/
+		Libs\Template::Compile( $m -> View(), ( !isset( $module_template['dir'] ) ? false : $module_template['dir'] ), ( !isset( $module_template['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $module_template['file'] ) );
 		unset( $t );
 	}
 

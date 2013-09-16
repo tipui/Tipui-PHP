@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-15 02:54:00
+* @updated: 2013-09-16 17:20:00
 */
 
 namespace Tipui\Builtin\Libs\Strings;
@@ -21,7 +21,7 @@ class StrLen
 	*/
 	public function Exec( $str, $charset = 'UTF-8' )
 	{
-		return mb_strlen( $str, $charset);
+		return mb_strlen( $str, $charset );
     }
 
 }

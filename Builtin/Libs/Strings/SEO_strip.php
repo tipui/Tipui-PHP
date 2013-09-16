@@ -23,7 +23,7 @@ class SEO_strip
 	*/
 	public function Exec( $str, $limit = 100 )
 	{
-		return Libs\Strings::Method( 'SEOFilter' ) -> Exec( trim( substr( $str, 0, $limit ) ) );
+		return Libs\Strings::SEOFilter( trim( substr( $str, 0, $limit ) ) );
     }
 
 }

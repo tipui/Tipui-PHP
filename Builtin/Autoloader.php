@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-08-31 16:10:00
+* @updated: 2013-09-17 01:25:00
 */
 
 namespace Tipui\Builtin;
@@ -65,7 +65,7 @@ class Autoloader
 		/**
 		* Get file name extension of PHP Files
 		*/
-		$file_extension = \Tipui\Core::CORE_ENV_FILE_EXTENSION;
+		$file_extension = TIPUI_CORE_ENV_FILE_EXTENSION;
 
 		/**
 		* determines which path is the base path, based on namespace based class name
@@ -80,10 +80,9 @@ class Autoloader
 			*/
 			if( count( $ns ) >= 2 )
 			{
-				if( $ns[0] == 'Builtin' )
+				if( $ns[0] == \Tipui\Core::ENV_FOLDER_BUILTIN )
 				{
-					//echo TIPUI_APP_PATH . $this -> core['ENGINE']['override_folder'] . PHP_EOL;
-					$base_path = TIPUI_APP_PATH . 'Override' . DIRECTORY_SEPARATOR;
+					$base_path = TIPUI_APP_PATH . TIPUI_FOLDER_OVERRIDE . DIRECTORY_SEPARATOR;
 					if( file_exists( $base_path ) and is_dir( $base_path ) )
 					{
 						/**
