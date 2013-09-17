@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-17 01:24:00
+* @updated: 2013-09-18 03:24:00
 */
 
 namespace Tipui;
@@ -71,6 +71,21 @@ class Core
 	* DataRules folder name
 	*/
 	const ENV_FOLDER_DATARULES = 'DataRules';
+
+	/**
+	* App models folder name
+	*/
+	const APP_FOLDER_MODEL = 'Model';
+
+	/**
+	* App routing folder name
+	*/
+	const APP_FOLDER_ROUTING = 'Routing';
+
+	/**
+	* App config folder name
+	*/
+	const APP_FOLDER_CONFIG = 'config';
 
 	/**
 	* Storage folder name
@@ -281,12 +296,12 @@ class Core
 		/**
 		* Directory of app configuration files. (independent, but required by the core)
 		*/
-		$app_conf_path = TIPUI_APP_PATH . 'config' . DIRECTORY_SEPARATOR;
+		$app_conf_path = TIPUI_APP_PATH . self::APP_FOLDER_CONFIG . DIRECTORY_SEPARATOR;
 
 		/**
 		* Gets the environment settings from the main file ENV.json
 		*/
-		$env_json = json_decode( file_get_contents( $app_conf_path . self::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR . 'ENV.json' ), true );
+		$env_json = json_decode( file_get_contents( $app_conf_path . self::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR . 'ENV' . self::CACHE_FILE_EXTENSION ), true );
 
 		/**
 		* Debug purposes
@@ -305,11 +320,35 @@ class Core
 		*/		
 		if( !$env_json['CACHE_REGENERATE'] and $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CACHE_FILE_EXTENSION ) )
 		{
-	
+
+			/**
+			* Executes PHP runtime ini settings
+			* Dependencies: ENV, BOOTSTRAP and PHP config/env files
+			*/
+			$env       = $this -> GetEnv( 'ENV' );
+			$bootstrap = $this -> GetEnv( 'BOOTSTRAP' );
+			$array     = $this -> GetEnv( 'PHP' );
+			require_once( $env['PATH'] . 'PHP_INI_SET' . TIPUI_CORE_ENV_FILE_EXTENSION );
+
+			/**
+			* Loads URL and MODULES configuration from cache files.
+			*/
 			$this -> env['URL']     = $this -> GetEnv( 'URL' );
 			$this -> env['MODULES'] = $this -> GetEnv( 'MODULES' );
-	
+
+			/**
+			* Clear FileSystem instance handler.
+			*/
 			$this -> fs = null;
+
+			/**
+			* Clean up used variables.
+			*/
+			unset( $script_path, $env_json, $app_conf_path, $env );
+
+			/**
+			* Force exit this method execution.
+			*/
 			return null;
 		}
 
@@ -361,7 +400,7 @@ class Core
 		* Clean up used variables. 
 		* The [code]$array[/code] variable is declared into included files above
 		*/
-		unset( $env, $env_files, $v, $array );
+		unset( $env_files, $v, $array, $env );
 
 		/**
 		* Clear FileSystem instance
@@ -598,7 +637,7 @@ class Core
 			/**
 			* If parameter is empty, loads Front Module (default module)
 			*/
-			if( !$rs = $this -> RoutingPathScanner( 'Model', $this -> env['MODULES']['Front'] ) )
+			if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['Front'] ) )
 			{
 				throw new \Exception('Front Module is invalid or not found. Check MODULES.php in /app/config/env/');
 			}
@@ -615,7 +654,7 @@ class Core
 			/**
 			* Scanning into main Modules folder.
 			*/
-			if( !$rs = $this -> RoutingPathScanner( 'Model', $clss ) )
+			if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $clss ) )
 			{
 
 				/**
@@ -626,7 +665,7 @@ class Core
 				/**
 				* Scanning routing module.
 				*/
-				if( !$rs = $this -> RoutingPathScanner( 'Routing', $this -> request['URI'] ) )
+				if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_ROUTING, $this -> request['URI'] ) )
 				{
 					/**
 					* Debug purposes
@@ -641,7 +680,7 @@ class Core
 			/**
 			* If model or routing not found, loads 404 (not found) Module
 			*/
-			if( !$rs and !$rs = $this -> RoutingPathScanner( 'Model', $this -> env['MODULES']['404'] ) )
+			if( !$rs and !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
 			{
 				throw new \Exception('404/Notfound Module is invalid or not found. Check MODULES.php in /app/config/env/');
 			}
@@ -696,7 +735,7 @@ class Core
 
 		while( $i > 0 and !$goal and !empty( $clss ) )
 		{
-			if( $path_base == 'Model' )
+			if( $path_base == self::APP_FOLDER_MODEL )
 			{
 
 				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . TIPUI_CORE_ENV_FILE_EXTENSION;
@@ -739,7 +778,7 @@ class Core
 					//echo 'ok';
 					//print_r( $rs ); exit;
 					$goal       = true;
-					$rs['path'] = TIPUI_APP_PATH . 'Model' . DIRECTORY_SEPARATOR . str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $rs['class'] ) . TIPUI_CORE_ENV_FILE_EXTENSION;
+					$rs['path'] = TIPUI_APP_PATH . self::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR . str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $rs['class'] ) . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 					if( !file_exists( $rs['path'] ) )
 					{
