@@ -24,8 +24,8 @@ class Cookie
 	*
 	* sample
 	* [code]
-	* $c = new Strings;
-	* $c -> Trim( ' foo ' );
+	* $c = new Cookie;
+	* $c -> Get( 'index_name' );
 	* [/code]
 	*/
     public function __call( $name, $arguments )
@@ -36,11 +36,11 @@ class Cookie
 	/**
 	* Statically.
 	*
-	* not available
+	* Cookie::Get( 'index_name' );
 	*/
     public static function __callStatic( $name, $arguments )
     {
-		//return Factory::Exec( 'Cookie', $name, $arguments );
+		return Factory::Exec( 'Cookie', $name, $arguments );
     }
 
 }

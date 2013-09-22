@@ -12,7 +12,6 @@
 
 /**
 * [important]
- - Form lib to Factory
  - Must check version of cookies and sessions. If version is different of app version, then, delete and created all, including the environment settings data cache. 
  - For security reasons, encode cookies and sessions data.
  - constants for cache options session, cookie, sqlite

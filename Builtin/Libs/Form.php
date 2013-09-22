@@ -8,15 +8,15 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-10 15:30:00
+* @updated: 2013-09-23 03:07:00
 */
 
 namespace Tipui\Builtin\Libs;
 
 use \Tipui\Builtin\Libs\DataRules as DataRules;
 
-/** [review]
-* Form properties and settings.
+/**
+* Form properties and settings library.
 */
 class Form
 {
@@ -33,146 +33,28 @@ class Form
 
 
 	/**
-	* Sets form action parameter
+	* Instance.
+	*
+	* sample
+	* [code]
+	* $c = new Form;
+	* $c -> SetAction( 'path' );
+	* [/code]
 	*/
-	public static function SetAction( $action = false )
-	{
-		/**
-		* <form action="">
-		*/
-		self::$action = $action;
-	}
+    public function __call( $name, $arguments )
+    {
+		return Factory::Exec( 'Form', $name, $arguments );
+    }
 
 	/**
-	* Gets form action parameter
+	* Statically.
+	*
+	* sample
+	* [code]Form::SetAction( 'path' );[/code]
 	*/
-	public static function GetAction()
-	{
-		/**
-		* <form action="">
-		*/
-		return self::$action;
-	}
-
-	/**
-	* Returns self $parameters property
-	*/
-	public static function GetParameter( $name = false )
-	{
-		if( !$name )
-		{
-			return self::$parameters;
-		}else{
-			if( isset( self::$parameters[$name] ) )
-			{
-				return self::$parameters[$name];
-			}else{
-				throw new \Exception('Parameter name "' . $name . '" not found.');
-			}
-		}
-	}
-
-	/**
-	* Sets form fields rules
-	*/
-	public static function SetField( $name, $rule, $required = true )
-	{
-		/**
-		* Creates parameter rules
-		*/
-		self::$parameters[$name] = DataRules::Get( $rule, $required );
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( self::$parameters[$name] ); exit;
-	}
-
-	/**
-	* Sets form fields rules containing array of options (generaly used for radio or checkbox)
-	*/
-	public static function SetFieldMultiValue( $name, $rule, $options, $required = true )
-	{
-		/**
-		* Creates parameter rules
-		*/
-		self::SetField( $name, $rule, $required );
-		self::SetFieldProperty( $name, 'options', $options );
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( self::$parameters[$name] ); exit;
-	}
-
-	/**
-	* Set property of an field
-	*/
-	protected static function SetFieldProperty( $name, $property, $val )
-	{
-		self::$parameters[$name][$property] = $val;
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( self::$parameters[$name] ); exit;
-	}
-
-	/**
-	* Gets form field
-	*/
-	protected static function GetField( $name = false, $property = false )
-	{
-
-		/**
-		* [code]self::$parameters[/code] must be an valid array
-		*/
-		if( self::$parameters == null )
-		{
-			throw new \Exception('Form::$parameters is null');
-		}
-
-		/**
-		* If [code]$name[/code] is false, returns entire array
-		*/
-		if( !$name )
-		{
-			return self::$parameters;
-		}else if( isset( self::$parameters[$name] ) ){
-			if( !$property )
-			{
-				/**
-				* Returns entire index property if exists
-				*/
-				if( isset( self::$parameters[$name][$property] ) )
-				{
-					/**
-					* Returns index property
-					*/
-					return self::$parameters[$name][$property];
-				}else{
-					/**
-					* Property not exists exception error
-					*/
-					throw new \Exception('Form::$parameters[' . $name . '][' . $property . '] not found.');
-				}
-			}else{
-				/**
-				* Returns entire index array
-				*/
-				return self::$parameters[$name];
-			}
-		}else{
-			/**
-			*  Index name not exists exception error
-			*/
-			throw new \Exception('Form::$parameters index "' . $name . '" not found.');
-		}
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( self::$parameters[$name] ); exit;
-	}
+    public static function __callStatic( $name, $arguments )
+    {
+		return Factory::Exec( 'Form', $name, $arguments );
+    }
 
 }

@@ -3,26 +3,26 @@
 /**
 * @class  Checkbox
 * @file   Checkbox.php
-* @brief  HTML Form input type Checkbox Helper functions.
+* @brief  HTML Form Element input type Checkbox Helper functions.
 * @date   2013-09-14 02:56:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-14 02:56:00
+* @updated: 2013-09-23 02:13:00
 */
 
-namespace Tipui\Builtin\Helpers\HTML\Form;
+namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
 
 use Tipui\Builtin\Libs as Libs;
 
 class Checkbox extends \Tipui\Builtin\Helpers\HTML\Form
 {
 
-	protected static function Add( $name, $property )
+	public static function Add( $name, $property )
     {
 		if( isset( $property['options'] ) )
 		{
-			return self::GroupingFieldOptionProperty( $name, $property );
+			return self::GroupingOptionProperty( $name, $property );
 		}
 
 		$rs  = '<input type="checkbox"' . self::ParametersAdd() . 'name="' . $name;

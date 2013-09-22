@@ -3,24 +3,24 @@
 /**
 * @class  Radio
 * @file   Radio.php
-* @brief  HTML Form input type Radio Helper functions.
+* @brief  HTML Form Element input type Checkbox Helper functions.
 * @date   2013-09-14 02:56:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-14 02:56:00
+* @updated: 2013-09-23 02:13:00
 */
 
-namespace Tipui\Builtin\Helpers\HTML\Form;
+namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
 
 use Tipui\Builtin\Libs as Libs;
 
 class Radio extends \Tipui\Builtin\Helpers\HTML\Form
 {
 
-	protected static function Add( $name, $property )
+	public static function Add( $name, $property )
     {
-		return self::GroupingFieldOptionProperty( $name, $property );
+		return self::GroupingOptionProperty( $name, $property );
 	}
 
 }
