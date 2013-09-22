@@ -7,7 +7,15 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-17 01:25:00
+* @updated: 2013-09-23 00:15:00
+*/
+
+/**
+* [important]
+ - Form lib to Factory
+ - Must check version of cookies and sessions. If version is different of app version, then, delete and created all, including the environment settings data cache. 
+ - For security reasons, encode cookies and sessions data.
+ - constants for cache options session, cookie, sqlite
 */
 
 use Tipui\Builtin\Libs as Libs;
@@ -19,6 +27,9 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Defining constants
 	*/
+	// Framework version
+	define( 'TIPUI_VERSION', '1.0' );
+
 	// Framework base path
 	define( 'TIPUI_PATH', dirname( __FILE__ ) . DIRECTORY_SEPARATOR );
 
@@ -123,13 +134,13 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* Debug purposes
-	* Retrieves Core request session cached data.
+	* Retrieves Core request cached data.
 	*/
 	//$is_cli_mode = $c -> GetMethodDataCache( 'IsCliMode' );
 	//var_dump( $is_cli_mode ); exit;
 
 	/**
-	* From this point, all methods of Core class requires Core::GetENV, Core::IsCliMode and Autoloader::.
+	* From this point, all methods of Core class requires Core::GetENV, Core::IsCliMode and Autoloader.
 	*
 	* Stores Core Request method result to cache.
 	*/
@@ -138,7 +149,7 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* Debug purposes
-	* Retrieves Core request session cached data.
+	* Retrieves Core request cached data.
 	*/
 	//$request = $c -> GetMethodDataCache( 'Request' );
 	//print_r( $request ); exit;
@@ -150,7 +161,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	$c -> SetMethodDataCache( 'Routing' );
 
 	/**
-	* Retrieves Core routing session cached data.
+	* Retrieves Core routing cached data.
 	*/
 	$module = $c -> GetMethodDataCache( 'Routing' );
 
@@ -179,11 +190,16 @@ if( !defined( 'TIPUI_PATH' ) )
 	{
 
 		/**
+		* Handles data for model cache
+		*/
+		$model_cache = null;
+
+		/**
 		* Retrieving template settings overriding, if exists
 		*/
 		if( method_exists( $clss, 'Template' ) )
 		{
-			$module_template = $m -> Template();
+			$model_cache['Template'] = $m -> Template();
 		}
 
 		/**
@@ -191,16 +207,104 @@ if( !defined( 'TIPUI_PATH' ) )
 		*/
 		if( method_exists( $clss, 'Header' ) )
 		{
-			$module_header = $m -> Header();
-			Libs\Header::HTTPStatus( $module_header['http_status'] );
-			unset( $module_header );
+			$model_cache['Header'] = $m -> Header();
+			Libs\Header::HTTPStatus( $model_cache['Header']['http_status'] );
 		}
+
+		/**
+		* Dwebug purposes
+		*/
+		//print_r( $model_cache ); exit;
+
+		/**
+		* Stores cache if $model_cache is not empty
+		*/
+
+		/**
+		* Get environment settings
+		*/
+		$env_modules = $c -> GetEnv( 'MODULES' );
+
+		/**
+		* Debug purposes
+		*/
+		//echo $env_modules['METHODS_CACHE_STORAGE_MODE']; exit;
+
+		/**
+		* Module/Model class name
+		*/
+		$model_cache['name'] = $module['class'];
+
+		/**
+		* Creates new instance of Cache library.
+		*/
+		$storage_cache = new Libs\Cache;
+
+		switch( $env_modules['METHODS_CACHE_STORAGE_MODE'] )
+		{
+			case 'session':
+
+				/**
+				* Stores data to Session
+				*/
+				$storage_cache -> Set( 
+					array( 'session' => array(
+							'key' => $c::MODEL_CACHE_SESSION_NAME,
+							'val' => $model_cache
+						)
+					)
+				);
+
+			break;
+			default:
+			case 'cookie':
+
+				/**
+				* Get cookies default settings
+				*/
+				$cookies = $c -> GetEnv( 'COOKIES' );
+
+				/**
+				* Debug purposes
+				*/
+				//print_r( $cookies ); exit;
+
+				/**
+				* Stores data to cookie
+				*/
+				$storage_cache -> Set( 
+					array( 'cookie' => array(
+							'key'       => $c::MODEL_CACHE_SESSION_NAME,
+							'val'       => $model_cache,
+							'time'      => $cookies['COOKIE_TIME'],
+							'time_mode' => $cookies['COOKIE_TIME_MODE'],
+							'path'      => $env_bootstrap['PUBLIC_FOLDER'],
+							'domain'    => $env_bootstrap['DOMAIN'],
+							'subdomain' => $env_bootstrap['SUBDOMAIN'],
+						)
+					)
+				);
+
+			break;
+			case 'sqlite':
+				throw new \Exception('Core method cache storage in sqlite not available.');
+			break;
+		}
+
+
+
+		/**
+		* Clear variables.
+		*/
+		unset( $env_modules, $storage_cache );
+
+
 
 		// Call Template library
 		/**
 		* [review]
 		* Defined in Routing Modules file, however, not implemented
-		* Must decide where will have priority. The Routing alias module settings or the Template method of module.
+		* Must decide witch will have priority. The Routing alias module settings or the Template method of module.
 		$module['force_language']
 		$module['default_language']
 		*/
@@ -209,15 +313,15 @@ if( !defined( 'TIPUI_PATH' ) )
 		* Call as instance
 		*/
 		//$t = new Libs\Template;
-		//$t -> Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $module_template['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $module_template['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+		//$t -> Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
 		/**
 		* Call statically
 		*/
-		Libs\Template::Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $module_template['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $module_template['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+		Libs\Template::Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
 		//Output's content-type
-		header( 'Content-Type: ' . ( !isset( $module_template['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $module_template['content_type'] ) . '; charset=' . ( !isset( $module_template['charset'] ) ? $env_bootstrap['CHARSET'] : $module_template['charset'] ) );
+		header( 'Content-Type: ' . ( !isset( $model_cache['Template']['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache['Template']['content_type'] ) . '; charset=' . ( !isset( $model_cache['Template']['charset'] ) ? $env_bootstrap['CHARSET'] : $model_cache['Template']['charset'] ) );
 
 		/**
 		* Rendering and dispatching the template
@@ -226,13 +330,17 @@ if( !defined( 'TIPUI_PATH' ) )
 		/**
 		* Call as instance
 		*/
-		//$t -> Compile( $m -> View(), ( !isset( $module_template['dir'] ) ? false : $module_template['dir'] ), ( !isset( $module_template['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $module_template['file'] ) );
+		//$t -> Compile( $m -> View(), ( !isset( $model_cache['Template']['dir'] ) ? false : $model_cache['Template']['dir'] ), ( !isset( $model_cache['Template']['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $model_cache['Template']['file'] ) );
 
 		/**
 		* Call statically
 		*/
-		Libs\Template::Compile( $m -> View(), ( !isset( $module_template['dir'] ) ? false : $module_template['dir'] ), ( !isset( $module_template['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $module_template['file'] ) );
-		unset( $t );
+		Libs\Template::Compile( $m -> View(), ( !isset( $model_cache['Template']['dir'] ) ? false : $model_cache['Template']['dir'] ), ( !isset( $model_cache['Template']['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $model_cache['Template']['file'] ) );
+
+		/**
+		* Clear $model_cache variable.
+		*/
+		unset( $model_cache );
 	}
 
 	/**

@@ -25,9 +25,9 @@ class Encode
 		/**
 		* Serialize cookie value before set it
 		*/
-		if( is_string( $v ) )
+		if( is_string( $str ) )
 		{
-			return $v;
+			return $str;
 		}
 		return serialize( $str );
 

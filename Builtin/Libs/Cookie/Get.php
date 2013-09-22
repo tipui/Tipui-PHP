@@ -8,12 +8,12 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 20:11:00
+* @updated: 2013-09-22 03:42:00
 */
 
 namespace Tipui\Builtin\Libs\Cookie;
 
-class Get
+class Get extends \Tipui\Builtin\Libs\Cookie
 {
 
 	/**
@@ -43,7 +43,7 @@ class Get
             if( isset( $_COOKIE[$key] ) )
             {
 
-                return $_COOKIE[$key];
+                return $this -> Decode( $_COOKIE[$key] );
 
             }else{
 

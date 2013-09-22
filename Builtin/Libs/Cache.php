@@ -1,46 +1,47 @@
 <?php
 
 /**
-* @class  Cookie
-* @file   Cookie.php
-* @brief  Cookie functions.
-* @date   2012-05-24 19:03:00
+* @class  Cache
+* @file   Cache.php
+* @brief  Cache functions.
+* @date   2010-09-22 22:04:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 03:42:00
+* @updated: 2010-09-22 22:04:00
 */
 
 namespace Tipui\Builtin\Libs;
 
 /**
-* Cookie library.
+* Cache library.
 */
-class Cookie
+class Cache
 {
 
- 	/**
+	/**
 	* Instance.
 	*
 	* sample
 	* [code]
-	* $c = new Strings;
-	* $c -> Trim( ' foo ' );
+	* $c = new Cache;
+	* $c -> Set( [arguments] );
 	* [/code]
 	*/
     public function __call( $name, $arguments )
     {
-		return Factory::Exec( 'Cookie', $name, $arguments );
+		return Factory::Exec( 'Cache', $name, $arguments );
     }
 
 	/**
 	* Statically.
 	*
-	* not available
+	* sample
+	* [code]Cache::Set( [arguments] );[/code]
 	*/
     public static function __callStatic( $name, $arguments )
     {
-		//return Factory::Exec( 'Cookie', $name, $arguments );
+		return Factory::Exec( 'Cache', $name, $arguments );
     }
 
 }

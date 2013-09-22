@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-18 03:24:00
+* @updated: 2013-09-22 23:25:00
 */
 
 namespace Tipui;
@@ -17,6 +17,7 @@ use \Tipui\Builtin\Libs as Libs;
 
 class Core
 {
+
 	/**
 	* Handles the environment settings
 	*/
@@ -38,9 +39,9 @@ class Core
 	private $request;
 
 	/**
-	* Handles Lib Session instance.
+	* Handles Lib Cache instance.
 	*/
-	private $session;
+	private $cache;
 
 	/**
 	* Path base to store core data cache files.
@@ -106,6 +107,11 @@ class Core
 	* The static method that calls Core->GetEnv()
 	*/
 	const CONF_CALLER = 'Tipui\Core::GetConf';
+
+	/**
+	* Model/Module session/cookie array index (id)
+	*/
+	const MODEL_CACHE_SESSION_NAME = 'Tipui::App::Model';
 
 	/**
 	* Stores the current object that is calling the Core.
@@ -821,21 +827,31 @@ class Core
 	public function GetMethodDataCache( $method = false, $instance = false )
 	{
 
-		if( $this -> session == null )
-		{
-			$this -> session = new Libs\Session;
-		}
+		/**
+		* Debug purposes
+		*/
+		//print_r( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] ); exit;
 
 		/**
-		* Get from session.
+		* Creates new instance of Cache library if not exists.
 		*/
-		$rs = $this -> session -> Get( 'Tipui::Core::' . $method );
+		( $this -> cache == null ) ? $this -> cache = new Libs\Cache : null;
+
+		/**
+		* [review:medium] Temporary conditional. Display warning message if storage mode is sqlite
+		*/
+		if( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] == 'sqlite' )
+		{
+			throw new \Exception('Core method cache storage in sqlite not available.');
+		}
+
+		$this -> core_methods_cached_data[$method] = $this -> cache -> Get( array( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] => array( 'key' => 'Tipui::Core::' . $method ) ) );
 
 		/**
 		* Debug purposes
 		*/
 		/*
-		if( !isset( $rs -> invalid_key ) )
+		if( !isset( $this -> core_methods_cached_data[$method] -> invalid_key ) )
 		{
 			echo 22;
 		}else{
@@ -845,17 +861,10 @@ class Core
 		*/
 
 		/**
-		* Clear variable
-		*/
-		unset( $rs );
-
-		/**
 		* If is valid session array key
 		*/
-		if( !isset( $rs -> invalid_key ) )
+		if( !isset( $this -> core_methods_cached_data[$method] -> invalid_key ) )
 		{
-
-			$this -> core_methods_cached_data[$method] = $this -> session -> Get( 'Tipui::Core::' . $method );
 
 			if( !$instance )
 			{
@@ -891,12 +900,66 @@ class Core
 	public function SetMethodDataCache( $method )
 	{
 
-		if( $this -> session == null )
-		{
-			$this -> session = new Libs\Session;
-		}
+		/**
+		* Debug purposes
+		*/
+		//print_r( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] ); exit;
 
-		$this -> session -> Set( 'Tipui::Core::' . $method, $this -> $method() );
+		/**
+		* Creates new instance of Cache library if not exists.
+		*/
+		( $this -> cache == null ) ? $this -> cache = new Libs\Cache : null;
+
+		switch( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] )
+		{
+			case 'session':
+
+				/**
+				* Stores data to Session
+				*/
+				$this -> cache -> Set( 
+					array( 'session' => array(
+							'key' => 'Tipui::Core::' . $method,
+							'val' => $this -> $method()
+						)
+					)
+				);
+
+			break;
+			default:
+			case 'cookie':
+
+				/**
+				* Get cookies default settings
+				*/
+				$this -> core_cached_data['COOKIES'] = $this -> GetEnv( 'COOKIES' );
+
+				/**
+				* Debug purposes
+				*/
+				//print_r( $this -> core_cached_data ); exit;
+
+				/**
+				* Stores data to cookie
+				*/
+				$this -> cache -> Set( 
+					array( 'cookie' => array(
+							'key'       => 'Tipui::Core::' . $method,
+							'val'       => $this -> $method(),
+							'time'      => $this -> core_cached_data['COOKIES']['COOKIE_TIME'],
+							'time_mode' => $this -> core_cached_data['COOKIES']['COOKIE_TIME_MODE'],
+							'path'      => $this -> core_cached_data['BOOTSTRAP']['PUBLIC_FOLDER'],
+							'domain'    => $this -> core_cached_data['BOOTSTRAP']['DOMAIN'],
+							'subdomain' => $this -> core_cached_data['BOOTSTRAP']['SUBDOMAIN'],
+						)
+					)
+				);
+
+			break;
+			case 'sqlite':
+				throw new \Exception('Core method cache storage in sqlite not available.');
+			break;
+		}
 
 		return null;
 

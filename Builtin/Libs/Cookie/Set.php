@@ -8,12 +8,12 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 20:11:00
+* @updated: 2013-09-22 03:42:00
 */
 
 namespace Tipui\Builtin\Libs\Cookie;
 
-class Set
+class Set extends \Tipui\Builtin\Libs\Cookie
 {
 
 	/**
@@ -33,8 +33,8 @@ class Set
 	* Usage sample 2:
 	* [code]
 	* // Set custom cookie parameters
-	* $env_bootstrap = \Tipui\Core::GetConf -> BOOTSTRAP;
-	* $env_cookies   = \Tipui\Core::GetConf -> COOKIES;
+	* $env_bootstrap = \Tipui\Core::GetConf() -> BOOTSTRAP;
+	* $env_cookies   = \Tipui\Core::GetConf() -> COOKIES;
 	* $c -> Set( 'foo', 'bar', $env_cookies -> COOKIE_TIME, $env_cookies -> COOKIE_TIME_MODE, $env_bootstrap -> PUBLIC_FOLDER, $env_bootstrap -> DOMAIN, $env_bootstrap -> SUBDOMAIN );
 	* [/code]
 	*/
@@ -46,9 +46,9 @@ class Set
 		/**
 		* Time to expire in seconds
 		*/
-		if( !$seconds )
+		if( !$time )
 		{
-			$env_cookies = \Tipui\Core::GetConf -> COOKIES;
+			$env_cookies = \Tipui\Core::GetConf() -> COOKIES;
 			$seconds     = strtotime( $env_cookies -> COOKIE_TIME . ' ' . $env_cookies -> COOKIE_TIME_MODE, time() );
 			unset( $env_cookies );
 		}else{
@@ -60,7 +60,7 @@ class Set
 		*/
 		if( !$path )
 		{
-			$env_bootstrap = \Tipui\Core::GetConf -> BOOTSTRAP;
+			$env_bootstrap = \Tipui\Core::GetConf() -> BOOTSTRAP;
 			$path          = $env_bootstrap -> PUBLIC_FOLDER;
 		}
 
@@ -72,7 +72,7 @@ class Set
 			/**
 			* Ignores $subdomain parameter
 			*/
-			( $env_bootstrap == null ) ? $env_bootstrap = \Tipui\Core::GetConf -> BOOTSTRAP : null;
+			( $env_bootstrap == null ) ? $env_bootstrap = \Tipui\Core::GetConf() -> BOOTSTRAP : null;
 			$domain = '.' . $env_bootstrap -> SUBDOMAIN . $env_bootstrap -> DOMAIN;
 		}else{
 			$domain = '.' . $subdomain . $domain;
@@ -83,13 +83,17 @@ class Set
 		*/
 		if( !is_string( $v ) )
 		{
-			$v = self::Encode( $v );
+			$v = $this -> Encode( $v );
 		}
 
 		/**
 		* Sets client cookie file
 		*/
-        setcookie( $k, $v, $seconds, $path, $domain, false, true );
+		if( !headers_sent() )
+		{
+			//echo time(); //exit;
+			setcookie( $k, $v, $seconds, $path, $domain, false, true );
+		}
 
 		/**
 		* Sets global variable $_COOKIE
