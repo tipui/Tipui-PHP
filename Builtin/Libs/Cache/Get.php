@@ -52,20 +52,20 @@ class Get
 
 		switch( $mode )
 		{
-			case 'session':
+			case \Tipui\Core::STORAGE_CACHE_MODE_SESSION:
 
 				$storage = new Libs\Session;
 				$rs = $storage -> Get( $data[$mode]['key'] );
 
 			break;
 			default:
-			case 'cookie':
+			case \Tipui\Core::STORAGE_CACHE_MODE_COOKIE:
 
 				$storage = new Libs\Cookie;
 				$rs = $storage -> Get( $data[$mode]['key'] );
 
 			break;
-			case 'sqlite':
+			case \Tipui\Core::STORAGE_CACHE_MODE_SQLITE:
 				throw new \Exception('Core method cache storage for sqlite not available.');
 			break;
 		}

@@ -59,21 +59,21 @@ class Set
 
 		switch( $mode )
 		{
-			case 'session':
+			case \Tipui\Core::STORAGE_CACHE_MODE_SESSION:
 
 				//( $storage == null ) ? $storage = new Libs\Session : null;
 				$storage = new Libs\Session;
 				$storage -> Set( $data[$mode]['key'], $data[$mode]['val'] );
 			break;
 			default:
-			case 'cookie':
+			case \Tipui\Core::STORAGE_CACHE_MODE_COOKIE:
 
 				//( $storage == null ) ? $storage = new Libs\Cookie : null;
 				$storage = new Libs\Cookie;
 				$storage -> Set( $data[$mode]['key'], $data[$mode]['val'], ( isset( $data[$mode]['time'] ) ? $data[$mode]['time'] : false ), ( isset( $data[$mode]['time_mode'] ) ? $data[$mode]['time_mode'] : false ), ( isset( $data[$mode]['path'] ) ? $data[$mode]['path'] : false ), ( isset( $data[$mode]['domain'] ) ? $data[$mode]['domain'] : false ), ( isset( $data[$mode]['subdomain'] ) ? $data[$mode]['subdomain'] : false ) );
 
 			break;
-			case 'sqlite':
+			case \Tipui\Core::STORAGE_CACHE_MODE_SQLITE:
 				throw new \Exception('Core method cache storage for sqlite not available.');
 			break;
 		}

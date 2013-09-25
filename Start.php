@@ -7,14 +7,15 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 00:15:00
+* @updated: 2013-09-26 03:59:00
+*
+* Git: https://github.com/tipui/Tipui-PHP
 */
 
 /**
 * [important]
- - Must check version of cookies and sessions. If version is different of app version, then, delete and created all, including the environment settings data cache. 
- - For security reasons, encode cookies and sessions data.
- - constants for cache options session, cookie, sqlite
+ - Thinking to create static method in Core to access cached methods data. To avoid create new instance of Core.
+ - And further more, create something to deny Core instance for not allowed scripts.
 */
 
 use Tipui\Builtin\Libs as Libs;
@@ -241,22 +242,22 @@ if( !defined( 'TIPUI_PATH' ) )
 
 		switch( $env_modules['METHODS_CACHE_STORAGE_MODE'] )
 		{
-			case 'session':
+			case $c::STORAGE_CACHE_MODE_SESSION:
 
 				/**
 				* Stores data to Session
 				*/
 				$storage_cache -> Set( 
-					array( 'session' => array(
+					array( $c::STORAGE_CACHE_MODE_SESSION => array(
 							'key' => $c::MODEL_CACHE_SESSION_NAME,
-							'val' => $model_cache
+							'val' => Libs\Encryption::Auto() -> Encode( $model_cache )
 						)
 					)
 				);
 
 			break;
 			default:
-			case 'cookie':
+			case $c::STORAGE_CACHE_MODE_COOKIE:
 
 				/**
 				* Get cookies default settings
@@ -272,9 +273,9 @@ if( !defined( 'TIPUI_PATH' ) )
 				* Stores data to cookie
 				*/
 				$storage_cache -> Set( 
-					array( 'cookie' => array(
+					array( $c::STORAGE_CACHE_MODE_COOKIE => array(
 							'key'       => $c::MODEL_CACHE_SESSION_NAME,
-							'val'       => $model_cache,
+							'val'       => Libs\Encryption::Auto() -> Encode( $model_cache ),
 							'time'      => $cookies['COOKIE_TIME'],
 							'time_mode' => $cookies['COOKIE_TIME_MODE'],
 							'path'      => $env_bootstrap['PUBLIC_FOLDER'],
@@ -285,7 +286,7 @@ if( !defined( 'TIPUI_PATH' ) )
 				);
 
 			break;
-			case 'sqlite':
+			case $c::STORAGE_CACHE_MODE_SQLITE:
 				throw new \Exception('Core method cache storage in sqlite not available.');
 			break;
 		}

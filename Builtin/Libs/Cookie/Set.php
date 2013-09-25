@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 03:42:00
+* @updated: 2013-09-26 03:59:00
 */
 
 namespace Tipui\Builtin\Libs\Cookie;
@@ -83,7 +83,7 @@ class Set extends \Tipui\Builtin\Libs\Cookie
 		*/
 		if( !is_string( $v ) )
 		{
-			$v = $this -> Encode( $v );
+			$v = serialize( $v );
 		}
 
 		/**
