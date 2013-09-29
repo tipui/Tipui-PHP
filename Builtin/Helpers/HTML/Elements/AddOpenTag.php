@@ -21,7 +21,7 @@ class AddOpenTag
 	*/
 	public function Exec( $lang = 'english' )
 	{
-		return '<html lang="' . $lang . '">';
+		return '<html lang="' . $lang . '" xmlns="http://www.w3.org/1999/xhtml">';
 	}
 
 }

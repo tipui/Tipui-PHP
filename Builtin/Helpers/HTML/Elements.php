@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 17:28:00
+* @updated: 2013-09-29 21:36:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML;
@@ -55,7 +55,7 @@ class Elements
 	* Statically.
 	*
 	* sample
-	* [code]Strings::Trim( ' foo ' );[/code]
+	* [code]Elements::AddTitle();[/code]
 	*/
     public static function __callStatic( $name, $arguments )
     {

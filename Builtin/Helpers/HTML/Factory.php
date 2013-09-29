@@ -42,7 +42,8 @@ class Factory
 		//echo $name . ': ' . implode(', ', $arguments); exit;
 		//echo get_class(); exit;
 
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . $library . DIRECTORY_SEPARATOR . $name . TIPUI_CORE_ENV_FILE_EXTENSION );
+		// [deprecated] 2013-09-30 03:51
+		//require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . $library . DIRECTORY_SEPARATOR . $name . TIPUI_CORE_ENV_FILE_EXTENSION );
 
 		/**
 		* Executes statically

@@ -7,13 +7,19 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-26 03:59:00
+* @updated: 2013-09-30 03:58:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
 
 /**
 * [important]
+ - Factory classes review:urgent. Create some way to avoid new instances or something to access only 1 instance. The current mode is creating new instance for everything.
+ - form validation lib
+ - check if user cookies are enabled. If not or if fail, then use session.
+ - benchmark lib
+ - db lib
+ - mail lib
  - Thinking to create static method in Core to access cached methods data. To avoid create new instance of Core.
  - And further more, create something to deny Core instance for not allowed scripts.
 */
@@ -39,13 +45,16 @@ if( !defined( 'TIPUI_PATH' ) )
 	// PHP scripts files name extension
 	define( 'TIPUI_CORE_ENV_FILE_EXTENSION', '.php' );
 
+	// App folder name
+	define( 'TIPUI_APP_FOLDER_NAME', 'app' );
+
 	// Override folder name
 	define( 'TIPUI_FOLDER_OVERRIDE', 'Override' );
 
 	/**
 	* @brief config files, models, templates, plugins, helpers, extra libs
 	* Can be defined on public/index.php file
-	* Example: [code]define( 'TIPUI_APP_PATH', dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR );[/code]
+	* Example: [code]define( 'TIPUI_APP_PATH', dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR );[/code]
 	*/
 	if( !defined( 'TIPUI_APP_PATH' ) )
 	{
@@ -55,7 +64,7 @@ if( !defined( 'TIPUI_PATH' ) )
 		* /public/index.php
 		* /app/ (default recommended location and folder name)
 		*/
-		$app_path = dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR;
+		$app_path = dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR;
 
 		if( is_dir( $app_path ) )
 		{
@@ -75,7 +84,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Path to overriding Core file.
 	*/
-	$file = TIPUI_APP_PATH . TIPUI_FOLDER_OVERRIDE . DIRECTORY_SEPARATOR . 'Core.php';
+	$file = TIPUI_APP_PATH . TIPUI_FOLDER_OVERRIDE . DIRECTORY_SEPARATOR . 'Core' . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 	/**
 	* Check if override file exists.
@@ -87,7 +96,7 @@ if( !defined( 'TIPUI_PATH' ) )
 		/**
 		* Use default builtin class.
 		*/
-		require_once( TIPUI_PATH . 'Core.php' );
+		require_once( TIPUI_PATH . 'Core' . TIPUI_CORE_ENV_FILE_EXTENSION );
 	}
 
 	unset( $file );
