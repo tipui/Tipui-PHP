@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-17 01:25:00
+* @updated: 2013-09-30 23:51:00
 */
 
 namespace Tipui\Builtin;
@@ -63,14 +63,23 @@ class Autoloader
 		$this -> overriding = false;
 
 		/**
+		* Debug purposes
+		*/
+		//echo $class_name . PHP_EOL;
+		//echo str_replace( DIRECTORY_SEPARATOR, '', $class_name ) . PHP_EOL;
+		//echo str_replace( '\\', '', __NAMESPACE__ ) . PHP_EOL;
+
+		/**
 		* Get file name extension of PHP Files
 		*/
 		$file_extension = TIPUI_CORE_ENV_FILE_EXTENSION;
 
 		/**
-		* determines which path is the base path, based on namespace based class name
+		* Determines which path is the base path, based on namespace based class name
+		* [review:high] str_replace() removes the slash or backslash. Without replaces, the logic will fails on linux systems.
 		*/
-		if( strpos( $class_name, __NAMESPACE__ ) === 0 )
+		//if( strpos( $class_name, __NAMESPACE__ ) === 0 )
+		if( strpos( str_replace( DIRECTORY_SEPARATOR, '', $class_name ), str_replace( '\\', '', __NAMESPACE__ ) ) === 0 )
 		{
 
 			/**
@@ -127,13 +136,17 @@ class Autoloader
 			* App's path
 			*/
 			$base_path = TIPUI_APP_PATH;
+
+			/**
+			* [review:high] Disabled by causing error on final string path.
+			*/
 			array_shift( $ns ); // removes "App\" from namespace
 		}
 
 		/**
 		* Debug purposes
 		*/
-		//print_r( $ns );
+		//print_r( $ns ); exit;
 
 		/**
 		* Including the file, if exists
@@ -141,10 +154,20 @@ class Autoloader
 		if( !$this -> overriding )
 		{
 			$file = $base_path . implode( DIRECTORY_SEPARATOR, $ns ) . $file_extension;
+
+			/**
+			* Debug purposes
+			*/
+			//echo $file . PHP_EOL . PHP_EOL . PHP_EOL; exit;
+
+			/**
+			* Including the file.
+			*/
 			if( file_exists( $file ) )
 			{
 				require_once( $file );
 			}else{
+				//echo $file; exit;
 				throw new \Exception('Class "' . $class_name . '" not found.');
 			}
 			unset( $base_path, $file );

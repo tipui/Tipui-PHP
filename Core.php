@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-26 03:59:00
+* @updated: 2013-10-01 00:26:00
 */
 
 namespace Tipui;
@@ -620,8 +620,8 @@ class Core
 		* /?p=Foo/Bar/2
 		*
 		* CMD samples:
-		* > C:\php\php5.3.26ts\php.exe E:\_w\vhosts\dev-fw.tipui.com\public\index.php -p p=Foo/Bar%26id=2
-		* > C:\php\php5.3.26ts\php.exe E:\_w\vhosts\dev-fw.tipui.com\public\index.php -p Foo/Bar/2
+		* > C:\php\php5.3.26ts\php.exe E:\_w\vhosts\dev-php.tipui.com\public\index.php -p p=Foo/Bar%26id=2
+		* > C:\php\php5.3.26ts\php.exe E:\_w\vhosts\dev-php.tipui.com\public\index.php -p Foo/Bar/2
 		*/
 
 		$c = new Builtin\Libs\Request;
@@ -774,10 +774,15 @@ class Core
 					*/
 					//echo 'ok';
 					//echo $clss; exit;
+
+					/**
+					* The 'class' parameter value must be backslash, because linux systems (or environment where DIRECTORY_SEPARATOR is normal slash /)
+					* The reason is that the namespaces uses backslash \
+					*/
 					$goal = true;
-					$rs   = array( 'path' => $path, 'class' => $clss );
+					$rs   = array( 'path' => $path, 'class' => str_replace( '/', '\\', $clss ) );
 				}else{
-					$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
+					//$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
 					/**
 					* Debug purposes
 					*/
