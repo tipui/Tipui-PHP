@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-10-04 16:47:00
+* @updated: 2013-10-04 19:13:00
 */
 
 namespace Tipui\Builtin\Libs\Template;
@@ -32,19 +32,9 @@ class Compile extends Libs\Template
         unset( $data, $k );
 
 		/**
-		* Path base for PHP include_path directive.
-		*/
-		$paths = self::$base_dir;
-
-		/**
 		* Path base for PHP include function.
 		*/
         self::$path = self::$base_dir;
-
-		/**
-		* [deprecated]
-		*/
-		//$paths = self::$base_dir . PATH_SEPARATOR . ini_get( 'include_path' );
 
 		/**
 		* Include optional extra directory
@@ -52,13 +42,11 @@ class Compile extends Libs\Template
         if( $dir )
         {
             self::$path .= $dir;
-			$paths = self::$path . PATH_SEPARATOR . $paths;
+			//set_include_path( get_include_path() . PATH_SEPARATOR . self::$base_dir );
+			//ini_set( 'include_path', ini_get( 'include_path' ) . PATH_SEPARATOR . self::$base_dir );
         }
 
-        ini_set( 'include_path', $paths );
-		unset( $paths );
-
-        //echo self::$path . $file; exit;
+		//echo PHP_EOL . ': ' . self::$path . $file; //exit;
         if( $fp = @fopen( self::$path . $file, 'r' ) )
         {
 

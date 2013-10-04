@@ -7,7 +7,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-10-01 00:02:00
+* @updated: 2013-10-04 19:13:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
@@ -318,10 +318,17 @@ if( !defined( 'TIPUI_PATH' ) )
 		*/
 
 		/**
+		* Sets PHP include_path
+		*/
+		$base_path = TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR;
+		set_include_path( $base_path );
+		//ini_set( 'include_path', $base_path );
+
+		/**
 		* Call as instance
 		*/
 		$t = new Libs\Template;
-		$t -> Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+		$t -> Init( $base_path, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
 		/**
 		* Call statically
@@ -348,7 +355,7 @@ if( !defined( 'TIPUI_PATH' ) )
 		/**
 		* Clear $model_cache variable.
 		*/
-		unset( $model_cache, $t );
+		unset( $base_path, $model_cache, $t );
 	}
 
 	/**
