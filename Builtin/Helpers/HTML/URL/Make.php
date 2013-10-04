@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-30 01:39:00
+* @updated: 2013-10-04 16:09:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\URL;
@@ -132,17 +132,22 @@ class Make
 		* Debug purposes
 		*/
 		//print_r( $this -> data ); exit;
-
+		//var_dump( func_get_args() ); exit;
+		//echo $this -> data['b']; //exit;
 
 		/**
 		* URL arguments (parameters)
 		* k represents parameters names
 		* v represents respective values of parameters
 		* both must have same size.
+		*
+		* If Parameters and Values are empty, ie: HTML\URL::Make() -> Parameters() -> Values();
+		* or, if size of arrays doesn't match, then, returns the env HREF_BASE
 		*/
         if( count( $this -> data['k'] ) <> count( $this -> data['v'] ) )
         {
-            return null;
+			return $this -> data['b'];
+            //return null;
         }
 
         switch( $this -> data['t'] )

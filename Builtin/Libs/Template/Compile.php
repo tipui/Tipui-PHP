@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 20:11:00
+* @updated: 2013-10-04 16:47:00
 */
 
 namespace Tipui\Builtin\Libs\Template;
@@ -24,15 +24,31 @@ class Compile extends Libs\Template
     public static function Exec( $data, $dir = false, $file = false ) 
     {
 
+		/**
+		* Mount the main tag. ie: $T[]
+		*/
         $k   = self::$tag;
-		//echo $k; exit;
         $$k  = $data;
         unset( $data, $k );
 
-		$paths = ini_get( 'include_path' ) . PATH_SEPARATOR . self::$base_dir . DIRECTORY_SEPARATOR;
+		/**
+		* Path base for PHP include_path directive.
+		*/
+		$paths = self::$base_dir;
 
+		/**
+		* Path base for PHP include function.
+		*/
         self::$path = self::$base_dir;
 
+		/**
+		* [deprecated]
+		*/
+		//$paths = self::$base_dir . PATH_SEPARATOR . ini_get( 'include_path' );
+
+		/**
+		* Include optional extra directory
+		*/
         if( $dir )
         {
             self::$path .= $dir;

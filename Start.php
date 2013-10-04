@@ -14,13 +14,12 @@
 
 /**
 * [important]
- - Factory classes review:urgent. Create some way to avoid new instances or something to access only 1 instance. The current mode is creating new instance for everything.
+ - Factory classes test instantes performance.
  - form validation lib
  - check if user cookies are enabled. If not or if fail, then use session.
  - benchmark lib
  - db lib
  - mail lib
- - Thinking to create static method in Core to access cached methods data. To avoid create new instance of Core.
  - And further more, create something to deny Core instance for not allowed scripts.
 */
 
@@ -183,7 +182,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Loading Model layer
 	*/
-	$clss = '\Tipui\App\Model\\' . $module['class'];
+	$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\Model\\' . $module['class'];
 	$m = new $clss;
 
 	/**
@@ -322,12 +321,12 @@ if( !defined( 'TIPUI_PATH' ) )
 		* Call as instance
 		*/
 		$t = new Libs\Template;
-		$t -> Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+		$t -> Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
 		/**
 		* Call statically
 		*/
-		//Libs\Template::Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
+		//Libs\Template::Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
 		//Output's content-type
 		header( 'Content-Type: ' . ( !isset( $model_cache['Template']['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache['Template']['content_type'] ) . '; charset=' . ( !isset( $model_cache['Template']['charset'] ) ? $env_bootstrap['CHARSET'] : $model_cache['Template']['charset'] ) );
