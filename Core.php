@@ -837,8 +837,8 @@ class Core
 					* The reason is that the namespaces uses backslash \
 					*/
 					$goal = true;
-					//$rs   = array( 'path' => $path, 'class' => str_replace( '/', '\\', $clss ) );
-					$rs   = array( 'path' => $path, 'class' => $clss );
+					$rs   = array( 'path' => $path, 'class' => str_replace( '/', '\\', $clss ) );
+					//$rs   = array( 'path' => $path, 'class' => $clss );
 				}else{
 					//$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
 					/**
