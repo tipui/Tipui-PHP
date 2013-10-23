@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-10-01 00:26:00
+* @updated: 2013-10-22 22:05:00
 */
 
 namespace Tipui;
@@ -606,7 +606,7 @@ class Core
 	/**
 	* Abstracts parameters from HTTP or CLI
 	*/
-    public function Request()
+    private function Request()
     {
 
 		/**
@@ -626,7 +626,7 @@ class Core
 
 		$c = new Builtin\Libs\Request;
 		$c -> SetDefaults();
-		$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
+		//$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
 		$c -> SetSapiMode( $this -> IsCliMode() );
 		$c -> SetURLParts( $this -> env['URL']['HREF_BASE'] );
 		/**
@@ -640,7 +640,12 @@ class Core
 		* Applying urldecode() to support multibyte strings from URL
 		* example http://localhost/ダミー
 		*/
-		$this -> request['URI'] = urldecode( $c -> Extract() );
+		$this -> request['method'] = $c -> GetMethod();
+		$this -> request['params'] = $c -> Extract();
+		$this -> request['mode_rewrite'] = $c -> IsModeRewrite();
+
+		//print_r( $this -> request ); exit;
+		//$this -> request['URI'] = urldecode( $c -> Extract() );
 
 		return $this -> request;
 
@@ -652,7 +657,40 @@ class Core
     public function Routing()
     {
 
-		$clss = str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $this -> request['URI'] );
+		/**
+		* Extracts the URL data. (get, post, method, url_rewrite, etc)
+		*/
+		$this -> Request();
+
+		/**
+		* If $this -> request['params'], means that is probably comming from normal URL.
+		* For this case, must check if $this -> env['URL']['PARAM_NAME'] exists in the array indexes.
+		*/
+		if( is_array( $this -> request['params'] ) and isset( $this -> request['params'][$this -> env['URL']['PARAM_NAME']] ) )
+		{
+			$module_uri = $this -> request['params'][$this -> env['URL']['PARAM_NAME']];
+		}else{
+			/**
+			* Probably, came from mode rewrite URL.
+			*/
+			$module_uri = $this -> request['params'];
+		}
+
+		/**
+		* Compatibility for multibyte strings
+		*/
+		$module_uri = urldecode( $module_uri );
+
+		/**
+		* Building the class name
+		*/
+		$clss = str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $module_uri );
+
+
+		/**
+		* Debug purposes
+		*/
+		//echo 'Routing:clss ' . $clss; exit;
 
 		if( empty( $clss ) )
 		{
@@ -670,7 +708,8 @@ class Core
 			* Debug purposes
 			*/
 			//echo $clss; exit;
-			//echo urldecode( $clss ); exit;
+			//echo urldecode( $clss ); //exit;
+			//echo PHP_EOL . $module_uri; exit;
 			//echo mb_detect_encoding( urldecode( $clss ) ); exit;
 
 			/**
@@ -682,12 +721,13 @@ class Core
 				/**
 				* Debug purposes
 				*/
-				//echo $this -> request['URI']; exit;
+				//echo $module_uri; exit;
 
 				/**
 				* Scanning routing module.
 				*/
-				if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_ROUTING, $this -> request['URI'] ) )
+				//if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_ROUTING, $module_uri ) )
+				if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_ROUTING, $clss ) )
 				{
 					/**
 					* Debug purposes
@@ -700,14 +740,25 @@ class Core
 			}
 
 			/**
-			* If model or routing not found, loads 404 (not found) Module
+			* If model or routing are not found, loads 404 (not found) Module
 			*/
 			if( !$rs and !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
 			{
-				throw new \Exception('404/Notfound Module is invalid or not found. Check MODULES.php in /app/config/env/');
+				throw new \Exception('404/NotFound Module is invalid or not found. Check MODULES.php in /app/config/env/');
 			}
 
 		}
+
+		/**
+		* Retrieves method and mode_rewrite parameters from $request property to Routing() output result.
+		*/
+		$rs['method']       = $this -> request['method'];
+		$rs['mode_rewrite'] = $this -> request['mode_rewrite'];
+
+		/**
+		* Clear $request property
+		*/
+		$this -> request = null;
 
 		/**
 		* Debug purposes
@@ -755,8 +806,14 @@ class Core
 		*/
 		$routing = false;
 
+		/**
+		* Handles the URL parameters
+		*/
+		$path_params = false;
+
 		while( $i > 0 and !$goal and !empty( $clss ) )
 		{
+
 			if( $path_base == self::APP_FOLDER_MODEL )
 			{
 
@@ -765,7 +822,7 @@ class Core
 				/**
 				* Debug purposes
 				*/
-				//echo $path . ': ';
+				//echo PHP_EOL . $path . ': ';
 
 				if( file_exists( $path ) )
 				{
@@ -780,7 +837,8 @@ class Core
 					* The reason is that the namespaces uses backslash \
 					*/
 					$goal = true;
-					$rs   = array( 'path' => $path, 'class' => str_replace( '/', '\\', $clss ) );
+					//$rs   = array( 'path' => $path, 'class' => str_replace( '/', '\\', $clss ) );
+					$rs   = array( 'path' => $path, 'class' => $clss );
 				}else{
 					//$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
 					/**
@@ -798,7 +856,7 @@ class Core
 
 				if( $rs = $routing -> Get( $clss ) )
 				{
-	
+
 					/**
 					* Debug purposes
 					*/
@@ -813,13 +871,43 @@ class Core
 					}
 
 				}else{
+					/*
 					$clss = substr( $clss, 0, strrpos( $clss, $this -> env['URL']['PFS'] ) );
-					/**
-					* Debug purposes
+					//echo PHP_EOL . 'ng [next] ' . $clss;
 					*/
-					//echo 'ng [next] ' . $clss;
 				}
 
+			}
+
+			if( !$goal )
+			{
+				/**
+				* Debug purposes
+				*/
+				//echo strrev( $clss ); exit;
+
+				/**
+				* Breaks each subpath into array $path_params.
+				* Rename $clss, removing the subpath until find the proper file path.
+				*/
+				$path_params[] = substr( $clss, strrpos( $clss, DIRECTORY_SEPARATOR ) + 1 );
+				$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
+
+			}else{
+				/**
+				* Debug purposes
+				*/
+				//echo PHP_EOL . 'path found! ' . $path . PHP_EOL;
+
+				/**
+				* If $path_params is array, must reverse the indexes order.
+				*/
+				$rs['params'] = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
+
+				/**
+				* Debug purposes
+				*/
+				//$rs['params'] = $path_params;
 			}
 
 			/**
@@ -828,12 +916,24 @@ class Core
 			//echo PHP_EOL;
 
 			$i--;
+
+		}
+
+		/**
+		* If parameters are in mode rewrite format (friendly url), must receive 'params' from $this -> request property.
+		*/
+		if( !$this -> request['mode_rewrite'] )
+		{
+			$rs['params'] = $this -> request['params'];
 		}
 
 		/**
 		* Debug purposes
 		*/
-		//echo $path;
+		//echo PHP_EOL . PHP_EOL;
+		//print_r( $rs ); exit;
+		//print_r( $path_params ); exit;
+		//echo PHP_EOL . 'path: ' . $path;
 		//exit;
 
 		unset( $routing, $i );

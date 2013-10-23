@@ -19,7 +19,7 @@ class EscapeJS
 	/**
 	* [review]
 	* Escapes quotes. 
-	* Intention is implement more filters.. not only escape quotes.
+	* Must implement more filters.. not only escape quotes.
 	*/
 	public function Exec( $str )
 	{

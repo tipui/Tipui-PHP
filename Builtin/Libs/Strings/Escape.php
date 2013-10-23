@@ -35,6 +35,7 @@ class Escape
 		{
 			if( !$escape or in_array( 'strip_tags', $escape ) )
 			{
+				//echo $exceptions; exit;
 				$str = Libs\Strings::StripTags( $str, $exceptions );
 			}
 
@@ -97,7 +98,7 @@ class Escape
 			Libs\Strings::Escape( 'foo bar', array( 'php', 'form' ) );
 			Libs\Strings::Escape( 'foo bar', array( 'php' ) );
 			Libs\Strings::Escape( 'foo bar', array( 'php', 'form', 'strip_tags' ) );
-			Libs\Strings::Escape( 'foo bar', false ); // apply all filters
+			Libs\Strings::Escape( 'foo bar' ); // apply all filters
 		*/
     }
 

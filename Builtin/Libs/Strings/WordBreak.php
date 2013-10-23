@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-15 02:54:00
+* @updated: 2013-10-24 01:20:00
 */
 
 namespace Tipui\Builtin\Libs\Strings;
@@ -25,7 +25,8 @@ class WordBreak
 	*/
 	public function Exec( $str, $limit = 15, $escape = false, $break = ' ' )
 	{
-		$str = mb_ereg_replace('#(\S{' . $limit . ',})#e', "chunk_split('$1', " . $limit . ", '" . $break . "')", $str );
+		$str = chunk_split( $str, $limit, $break );
+		//$str = mb_ereg_replace('#(\S{' . $limit . ',})#e', "chunk_split('$1', " . $limit . ", '" . $break . "')", $str );
 		if( $escape )
 		{
 			return Libs\Strings::Escape( $str, false );

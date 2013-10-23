@@ -7,20 +7,27 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-10-04 19:13:00
+* @updated: 2013-10-23 01:04:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
 
 /**
-* [important]
- - Factory classes test instantes performance.
- - form validation lib
- - check if user cookies are enabled. If not or if fail, then use session.
- - benchmark lib
- - db lib
- - mail lib
- - And further more, create something to deny Core instance for not allowed scripts.
+* [important and insights]
+ - When scanning URI, detect if folder is found. If found, the previous piece will be declared as not found module.
+   example: http://dev-php.tipui.com/Tests/Builtin/Libs/Browse/asd
+   Must return notfound because "Tests/Builtin/Libs/Browse" exists.
+
+ - Factory classes: Test instantes performance.
+ - Form validation lib
+ - [optional] Module and Template file with same name of existing folder will search folder/index.php and folder/index.html respectivelly if files not exists in the indicated path.
+ - DB lib
+ - Mail lib
+ - Benchmark lib
+ - Check if user cookies are enabled. If not enabled or fails, then use session.
+ - Cookie data version. Will be useful for cases when cookie or session structures was modified.
+ - sys_getloadavg php function implementation
+ - Deny access to Core instance from not allowed scripts.
 */
 
 use Tipui\Builtin\Libs as Libs;
@@ -149,11 +156,7 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* From this point, all methods of Core class requires Core::GetENV, Core::IsCliMode and Autoloader.
-	*
-	* Stores Core Request method result to cache.
 	*/
-	//$c -> Request();
-	$c -> SetMethodDataCache( 'Request' );
 
 	/**
 	* Debug purposes

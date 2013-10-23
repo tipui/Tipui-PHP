@@ -34,9 +34,7 @@ class Make
 	/**
 	* Mount and return local domain URL
 	*
-	* Usage samples
-	* URLWrite::Make( array( 't' => 'normal', 'k' => array( PARAM_NAME, 'ID', 'Page' ), 'v' => array( 1, 2, 3 ) ) );
-	* URLWrite::Make( array( 'k' => array( PARAM_NAME, 'ID', 'Page' ), 'v' => array( 1, 2, 3 ) ) );
+	* Usage escope
 	*
 	* URL::Make( [url_mode], [protocol], [url_base] ) -> Parameters( 'id', 'other' ) -> Values( model_name, 1, 2 );
 	*

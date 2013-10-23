@@ -17,7 +17,7 @@ class StrBr
 {
 
 	/**
-	* Replace break line to <br />
+	* Replace break line with <br /> tag
 	*/
 	public function Exec( $str, $force = false )
 	{
