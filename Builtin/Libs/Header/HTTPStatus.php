@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 19:16:00
+* @updated: 2013-11-15 22:26:00
 */
 
 namespace Tipui\Builtin\Libs\Header;
@@ -57,6 +57,12 @@ class HTTPStatus
 			case 410:
 			$title = 'Gone';
 			break;
+			
+			// http://stackoverflow.com/questions/9454811/which-http-status-code-to-use-for-required-parameters-not-provided
+			case 422:
+			$title = 'Unprocessable Entity (WebDAV; RFC 4918)'; // bad / invalid parameters
+			break;
+
 			case 429:
 			$title = 'Too Many Requests';
 			break;
