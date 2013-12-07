@@ -4,11 +4,11 @@
 * @class  GroupingOptionProperty
 * @file   GroupingOptionProperty.php
 * @brief  GroupingOptionProperty HTML Helper Form Elements functions.
-* @date   2013-09-22 14:44:00
+* @date   2013-12-05 20:13:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 14:44:00
+* @updated: 2013-12-05 20:13:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
@@ -26,14 +26,14 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 		* name property
 		*/
 		$name_add = '';
-		if( self::$key_add )
+		if( self::$name_as_array )
 		{
 
-			if( !is_array( self::$key_add  ) )
+			if( !is_array( self::$name_as_array  ) )
 			{
-				$name_add .= '[' . self::$key_add . ']';
+				$name_add .= '[' . self::$name_as_array . ']';
 			}else{
-				foreach( self::$key_add as $k => $v )
+				foreach( self::$name_as_array as $k => $v )
 				{
 					$name_add .= '[' . $v . ']';
 				}
@@ -43,12 +43,12 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 			* Debug purposes
 			*/
 			//print_r( $v ); exit;
-			//print_r( self::$key_add); exit;
-			//print_r( $data['key'][self::$key_add] ); exit;
+			//print_r( self::$name_as_array); exit;
+			//print_r( $data['key'][self::$name_as_array] ); exit;
 
-			if( isset( $property['value'][self::$key_add] ) )
+			if( isset( $property['value'][self::$name_as_array] ) )
 			{
-				$property['value'] = $property['value'][self::$key_add];
+				$property['value'] = $property['value'][self::$name_as_array];
 			}
 
 		}
@@ -57,7 +57,7 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 		* Debug purposes
 		*/
 		//print_r( $property ); exit;
-		//print_r( $property['key'][self::$key_add] ); exit;
+		//print_r( $property['key'][self::$name_as_array] ); exit;
 		//print_r( $property['value'] ); exit;
 
         $check = false;

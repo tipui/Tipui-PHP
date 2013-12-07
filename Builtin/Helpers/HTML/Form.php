@@ -23,10 +23,10 @@ class Form
 
 	/**
 	* Optional form object name as array
-	* [code]HTML\Form::$key_add = 'a';[/code]
+	* [code]HTML\Form::$name_as_array = 'a';[/code]
 	* i.e. [code]<input name="foo[a]"...[/code]
 	*/
-	protected static $key_add;
+	protected static $name_as_array;
 
 	/**
 	* [code]<input class=""[/code]

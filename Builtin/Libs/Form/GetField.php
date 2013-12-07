@@ -3,7 +3,7 @@
 /**
 * @class  GetField
 * @file   GetField.php
-* @brief  GetField Header functions.
+* @brief  GetField Builtin Form Lib functions.
 * @date   2013-09-23 03:07:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.

@@ -25,13 +25,13 @@ class Password extends \Tipui\Builtin\Helpers\HTML\Form
 		/**
 		* name property
 		*/
-		if( self::$key_add )
+		if( self::$name_as_array )
 		{
-			if( !is_array( self::$key_add  ) )
+			if( !is_array( self::$name_as_array  ) )
 			{
-				$rs .= '[' . self::$key_add . ']';
+				$rs .= '[' . self::$name_as_array . ']';
 			}else{
-				foreach( self::$key_add as $k => $v )
+				foreach( self::$name_as_array as $k => $v )
 				{
 					$rs .= '[' . $v . ']';
 				}
