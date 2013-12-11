@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-17 01:25:00
+* @updated: 2013-12-08 17:33:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -18,8 +18,103 @@ use \Tipui\Builtin\Libs as Libs;
 class DataRules
 {
 
+	/**
+	* Handles the element value parameter
+	*/
+	const VALUE          = 'VALUE';
+ 
+	/**
+	* Defines the default value
+	*/
+	const DEFAULTS       = 'default';
+
+	/**
+	* Element type (text, hidden, password, checkbox, radio, file, select, textearea)
+	*/
+	const TYPE           = 'type';
+
+	/**
+	* Defines the element/field size
+	*/
+	const SIZE           = 'size';
+
+	/**
+	* For select, radio and checkbox types
+	*/
+	const OPTIONS        = 'options';
+
+	/**
+	* Validation type (int, float, char, date, time, datetime, upload)
+	*/
+	const VALIDATION     = 'validation';
+
+	/**
+	* Filter the value parameter before assign to data rule parameter 'value'
+	*/
+	const PRE_FILTER     = 'pre-filter';
+
+	/**
+	* The exact value parameter
+	*/
+	const EXACTVALUE     = 'ExactValue';
+
+	/**
+	* The value parameter string length
+	*/
+	const MINLENGTH      = 'MinLength';
+	const MAXLENGTH      = 'MaxLength';
+
+	/**
+	* For textarea type
+	*/
+	const COLS           = 'cols';
+	const ROWS           = 'rows';
+
+	/**
+	* For files (file upload)
+	*/
+
+	/**
+	* For file maximum and minimum size defined in bytes
+	*/
+	const MAX_SIZE       = 'max_size';
+	const MIN_SIZE       = 'min_size';
+
+	/**
+	* Media dimensions (jpg, gif, bmp, swf, etc)
+	*/
+	const MIN_WIDTH      = 'min_width';
+	const MAX_WIDTH      = 'max_width';
+	const MIN_HEIGHT     = 'min_height';
+	const MAX_HEIGHT     = 'max_height';
+
+	/**
+	* File types allowed
+	* ie: array('jpg', 'gif', 'png')
+	*/
+	const CONTENT_TYPES  = 'content_types';
+
+	/**
+	* Handles the rules requested
+	*/
 	protected static $rules;
 
+	/**
+	* Returns file name/path
+	*/
+	public static function RuleFileName( $rule = 'general' )
+	{
+		/**
+		* Converting the $rule string slashes.
+		* If the Operational System of environment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
+		*/
+		$rule = strtolower( $rule );
+		return \Tipui\Core::ENV_FOLDER_HELPERS . DIRECTORY_SEPARATOR . \Tipui\Core::ENV_FOLDER_DATARULES . DIRECTORY_SEPARATOR . ( ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule ) . TIPUI_CORE_ENV_FILE_EXTENSION;
+	}
+
+	/**
+	* Returns the rule data file content.
+	*/
 	public static function Get( $rule = 'general', $required = true )
 	{
 
@@ -29,11 +124,7 @@ class DataRules
 		if( !isset( self::$rules[$rule] ) )
 		{
 
-			/**
-			* Converting the $rule string slashes.
-			* If the Operational System of environment uses normal slash as directory separator, then, the string backslash will be replaced with normal slash
-			*/
-			$rule_file = \Tipui\Core::ENV_FOLDER_HELPERS . DIRECTORY_SEPARATOR . \Tipui\Core::ENV_FOLDER_DATARULES . DIRECTORY_SEPARATOR . ( ( DIRECTORY_SEPARATOR != '\\' ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $rule ) : $rule ) . TIPUI_CORE_ENV_FILE_EXTENSION;
+			$rule_file = self::RuleFileName( $rule );
 
 			/**
 			* App custom file (priority)
@@ -86,13 +177,13 @@ class DataRules
 
 		/*
 		Recommend usage with Libs\Form
-		Form::SetField( [field name], [rule] );
+		Form::SetElement( [field name], [rule] );
 
 		[Samples]
-		Form::SetField( 'email', 'email' );
+		Form::SetElement( 'email', 'email' );
 
 		Calling from subfolders in DataRules folder (DataRules/Foo/email.php):
-		Form::SetField( 'email', 'Foo/email' );
+		Form::SetElement( 'email', 'Foo/email' );
 		*/
 	}
 

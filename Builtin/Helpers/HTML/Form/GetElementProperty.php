@@ -8,7 +8,9 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-04 02:56:00
+* @updated: 2013-12-07 21:06:00
+*
+* @see: \Tipui\Builtin\Libs\Form\GetField;
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
@@ -27,7 +29,7 @@ class GetElementProperty extends \Tipui\Builtin\Helpers\HTML\Form
 		/**
 		* Load paremeter properties if is empty
 		*/
-		( empty( self::$parameter ) ) ? self::$parameter = \Tipui\Builtin\Libs\Form::GetParameter( $name ) : '';
+		( empty( self::$parameter ) ) ? self::$parameter = \Tipui\Builtin\Libs\Form::GetElement( $name ) : '';
 
 		/**
 		* Returns the results

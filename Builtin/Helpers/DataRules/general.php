@@ -1,5 +1,4 @@
 <?php
-// 'general':
 $rs = array (
 	'type'           => 'text',
 	'MinLength'      => 1,
@@ -10,4 +9,3 @@ $rs = array (
 	'default'        => '',
 	'pre-filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( false ) ),					
 );
-?>

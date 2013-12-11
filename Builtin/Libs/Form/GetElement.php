@@ -1,19 +1,21 @@
 <?php
 
 /**
-* @class  GetField
-* @file   GetField.php
-* @brief  GetField Builtin Form Lib functions.
+* @class  GetElement
+* @file   GetElement.php
+* @brief  GetElement Builtin Form Lib functions.
 * @date   2013-09-23 03:07:00
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 03:07:00
+* @updated: 2013-12-07 21:06:00
+*
+* @see: \Tipui\Builtin\Helpers\HTML\Form\GetElementProperty;
 */
 
 namespace Tipui\Builtin\Libs\Form;
 
-class GetField extends \Tipui\Builtin\Libs\Form
+class GetElement extends \Tipui\Builtin\Libs\Form
 {
 
 	/**
@@ -36,7 +38,8 @@ class GetField extends \Tipui\Builtin\Libs\Form
 		{
 			return self::$parameters;
 		}else if( isset( self::$parameters[$name] ) ){
-			if( !$property )
+
+			if( $property )
 			{
 				/**
 				* Returns entire index property if exists
@@ -59,6 +62,7 @@ class GetField extends \Tipui\Builtin\Libs\Form
 				*/
 				return self::$parameters[$name];
 			}
+
 		}else{
 			/**
 			*  Index name not exists exception error

@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-04 03:47:00
+* @updated: 2013-12-07 21:06:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
@@ -26,7 +26,7 @@ class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
 		/**
 		* Debug purposes
 		*/
-		self::$parameter = Libs\Form::GetParameter( $name );
+		self::$parameter = Libs\Form::GetElement( $name );
 
 		/**
 		* For array types (multiple)
