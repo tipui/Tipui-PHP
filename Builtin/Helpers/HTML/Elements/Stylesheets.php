@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 14:44:00
+* @updated: 2013-12-19 02:48:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Elements;
@@ -53,7 +53,7 @@ class Stylesheets extends \Tipui\Builtin\Helpers\HTML\Elements
 	* Helper\HTML::Stylesheets()->SetArray( array( 
 	*	array( 'file' => 'foo.css' ), 
 	*	array( 'file' => 'bar.css' ), 
-	*	array( 'file' => 'test.css', 'base_path' => '/js_sample/' ) 
+	*	array( 'file' => 'test.css', 'base_path' => '/other_base_folder/' ) 
 	* ) );
 	*
 	* // Writes the results
@@ -66,7 +66,7 @@ class Stylesheets extends \Tipui\Builtin\Helpers\HTML\Elements
 	* Helper\HTML::Stylesheets()->AddArray( array( 
 	*	array( 'file' => 'foo.css' ), 
 	*	array( 'file' => 'bar.css' ), 
-	*	array( 'file' => 'test.css', 'base_path' => '/js_sample/' ) 
+	*	array( 'file' => 'test.css', 'base_path' => '/other_base_folder/' ) 
 	* ) );
 	* [/code]
 	*

@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 14:44:00
+* @updated: 2013-12-19 02:48:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Elements;
@@ -53,7 +53,7 @@ class JSFiles extends \Tipui\Builtin\Helpers\HTML\Elements
 	* Helper\HTML::JSFiles()->SetArray( array( 
 	*	array( 'file' => 'foo.js' ), 
 	*	array( 'file' => 'bar.js' ), 
-	*	array( 'file' => 'test.js', 'base_path' => '/js_sample/' ) 
+	*	array( 'file' => 'test.js', 'base_path' => '/other_base_folder/' ) 
 	* ) );
 	*
 	* // Writes the results
@@ -66,7 +66,7 @@ class JSFiles extends \Tipui\Builtin\Helpers\HTML\Elements
 	* Helper\HTML::JSFiles()->AddArray( array( 
 	*	array( 'file' => 'foo.js' ), 
 	*	array( 'file' => 'bar.js' ), 
-	*	array( 'file' => 'test.js', 'base_path' => '/js_sample/' ) 
+	*	array( 'file' => 'test.js', 'base_path' => '/other_base_folder/' ) 
 	* ) );
 	* [/code]
 	*
