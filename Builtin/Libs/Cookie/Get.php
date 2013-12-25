@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-26 03:59:00
+* @updated: 2013-12-22 23:40:00
 */
 
 namespace Tipui\Builtin\Libs\Cookie;
@@ -72,7 +72,7 @@ class Get extends \Tipui\Builtin\Libs\Cookie
         }else{
 
 			/**
-			* Returns entire array if exists.
+			* Returns entire array.
 			*/
             if( isset( $_COOKIE ) )
             {

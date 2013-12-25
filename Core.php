@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-11-16 00:13:00
+* @updated: 2013-12-25 04:17:00
 */
 
 namespace Tipui;
@@ -626,7 +626,7 @@ class Core
 
 		$c = new Builtin\Libs\Request;
 		$c -> SetDefaults();
-		//$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
+		//$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] ); [deprecated]
 		$c -> SetSapiMode( $this -> IsCliMode() );
 		$c -> SetURLParts( $this -> env['URL']['HREF_BASE'] );
 		/**
@@ -1063,12 +1063,19 @@ class Core
 		/**
 		* [review:medium] Temporary conditional. Display warning message if storage mode is sqlite
 		*/
+		/* [deprecated:2013-12-24]
 		if( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] == self::STORAGE_CACHE_MODE_SQLITE )
 		{
 			throw new \Exception('Core method cache storage in sqlite not available.');
 		}
+		*/
 
-		$this -> core_methods_cached_data[$method] = $this -> cache -> Get( array( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] => array( 'key' => 'Tipui::Core::' . $method ) ) );
+		//$this -> core_methods_cached_data[$method] = $this -> cache -> Get( array( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] => array( 'key' => 'Tipui::Core::' . $method ) ) );
+
+		//$this -> core_methods_cached_data[$method] = $this -> cache -> Get( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'], 'Tipui::Core::' . $method );
+
+		$this -> core_methods_cached_data[$method] = $this -> cache -> Get( 'Tipui::Core::' . $method );
+		//var_dump( $this -> core_methods_cached_data[$method] ); exit;
 
 		/**
 		* Debug purposes
@@ -1147,56 +1154,13 @@ class Core
 		*/
 		( $this -> cache == null ) ? $this -> cache = new Libs\Cache : null;
 
-		switch( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] )
-		{
-			case self::STORAGE_CACHE_MODE_SESSION:
-
-				/**
-				* Stores data to Session
-				*/
-				$this -> cache -> Set( 
-					array( self::STORAGE_CACHE_MODE_SESSION => array(
-							'key' => 'Tipui::Core::' . $method,
-							'val' => Libs\Encryption::Auto() -> Encode( $this -> $method() )
-						)
-					)
-				);
-
-			break;
-			default:
-			case self::STORAGE_CACHE_MODE_COOKIE:
-
-				/**
-				* Get cookies default settings
-				*/
-				$this -> core_cached_data['COOKIES'] = $this -> GetEnv( 'COOKIES' );
-
-				/**
-				* Debug purposes
-				*/
-				//print_r( $this -> core_cached_data ); exit;
-
-				/**
-				* Stores data to cookie
-				*/
-				$this -> cache -> Set( 
-					array( self::STORAGE_CACHE_MODE_COOKIE => array(
-							'key'       => 'Tipui::Core::' . $method,
-							'val'       => Libs\Encryption::Auto() -> Encode( $this -> $method() ),
-							'time'      => $this -> core_cached_data['COOKIES']['COOKIE_TIME'],
-							'time_mode' => $this -> core_cached_data['COOKIES']['COOKIE_TIME_MODE'],
-							'path'      => $this -> core_cached_data['BOOTSTRAP']['PUBLIC_FOLDER'],
-							'domain'    => $this -> core_cached_data['BOOTSTRAP']['DOMAIN'],
-							'subdomain' => $this -> core_cached_data['BOOTSTRAP']['SUBDOMAIN'],
-						)
-					)
-				);
-
-			break;
-			case self::STORAGE_CACHE_MODE_SQLITE:
-				throw new \Exception('Core method cache storage in sqlite not available.');
-			break;
-		}
+		/**
+		* Stores data to cache
+		*/
+		$this -> cache -> Set( array(
+								'Tipui::Core::' . $method => Libs\Encryption::Auto() -> Encode( $this -> $method() )
+								)
+							);
 
 		return null;
 

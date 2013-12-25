@@ -101,9 +101,8 @@ class Request
 	*
 	* sample
 	* [code]
-	* $t = new Libs\Request;
-	* $t -> Init( base_path, tag, output );
-	* $t -> Compile( dataArray, template_dir, template_file );
+	* $c = new Libs\Request;
+	* $c -> MethodName();
 	* [/code]
 	*/
     public function __call( $name, $arguments )
@@ -116,8 +115,7 @@ class Request
 	*
 	* sample
 	* [code]
-	* Libs\Request::Init( base_path, tag, output );
-	* Libs\Request::Compile( dataArray, template_dir, template_file );
+	* Request::MethodName();
 	* [/code]
 	*/
     public static function __callStatic( $name, $arguments )

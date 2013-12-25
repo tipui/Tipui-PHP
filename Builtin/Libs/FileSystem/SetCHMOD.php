@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 02:57:00
+* @updated: 2013-12-25 19:04:00
 */
 
 namespace Tipui\Builtin\Libs\FileSystem;
@@ -31,8 +31,13 @@ class SetCHMOD
 				$mask = @umask( 0 );
 				@chmod( $path, $mode );
 				@umask( $mask );
+
+				return true;
 			}else{
-				return 4;
+				/**
+				* The source file path not exists
+				*/
+				return 2;
 			}
 		}
         return null;

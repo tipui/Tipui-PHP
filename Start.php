@@ -7,14 +7,16 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-11-16 00:13:00
+* @updated: 2013-12-26 03:47:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
 
 /**
 * [important and insights]
- - Form validation lib
+ - Cache mode options set (Docs/Builtin/Libs/Cache) Cache->Cookie(time, time_mode...)->Set();
+ - Core methods
+ - Check cache integrity (cookies, sessions)
  - [optional] Module and Template file with same name of existing folder will search folder/index.php and folder/index.html respectivelly if files not exists in the indicated path.
  - DB lib
  - Mail lib
@@ -247,58 +249,10 @@ if( !defined( 'TIPUI_PATH' ) )
 		*/
 		$storage_cache = new Libs\Cache;
 
-		switch( $env_modules['METHODS_CACHE_STORAGE_MODE'] )
-		{
-			case $c::STORAGE_CACHE_MODE_SESSION:
-
-				/**
-				* Stores data to Session
-				*/
-				$storage_cache -> Set( 
-					array( $c::STORAGE_CACHE_MODE_SESSION => array(
-							'key' => $c::MODEL_CACHE_SESSION_NAME,
-							'val' => Libs\Encryption::Auto() -> Encode( $model_cache )
-						)
-					)
-				);
-
-			break;
-			default:
-			case $c::STORAGE_CACHE_MODE_COOKIE:
-
-				/**
-				* Get cookies default settings
-				*/
-				$cookies = $c -> GetEnv( 'COOKIES' );
-
-				/**
-				* Debug purposes
-				*/
-				//print_r( $cookies ); exit;
-
-				/**
-				* Stores data to cookie
-				*/
-				$storage_cache -> Set( 
-					array( $c::STORAGE_CACHE_MODE_COOKIE => array(
-							'key'       => $c::MODEL_CACHE_SESSION_NAME,
-							'val'       => Libs\Encryption::Auto() -> Encode( $model_cache ),
-							'time'      => $cookies['COOKIE_TIME'],
-							'time_mode' => $cookies['COOKIE_TIME_MODE'],
-							'path'      => $env_bootstrap['PUBLIC_FOLDER'],
-							'domain'    => $env_bootstrap['DOMAIN'],
-							'subdomain' => $env_bootstrap['SUBDOMAIN'],
-						)
-					)
-				);
-
-			break;
-			case $c::STORAGE_CACHE_MODE_SQLITE:
-				throw new \Exception('Core method cache storage in sqlite not available.');
-			break;
-		}
-
-
+		$storage_cache -> Set( array(
+								$c::MODEL_CACHE_SESSION_NAME => Libs\Encryption::Auto() -> Encode( $model_cache )
+								)
+							);
 
 		/**
 		* Clear variables.
@@ -334,9 +288,16 @@ if( !defined( 'TIPUI_PATH' ) )
 		*/
 		//Libs\Template::Init( TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR, $env_templates['TAG'], $env_templates['OUTPUT'] );
 
-		//Output's content-type
-		header( 'Content-Type: ' . ( !isset( $model_cache['Template']['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache['Template']['content_type'] ) . '; charset=' . ( !isset( $model_cache['Template']['charset'] ) ? $env_bootstrap['CHARSET'] : $model_cache['Template']['charset'] ) );
 
+
+		//Output's header content-type and charset
+		Libs\Header::ContentType( 
+				( !isset( $model_cache['Template']['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache['Template']['content_type'] ),
+				( !isset( $model_cache['Template']['charset'] ) ? $env_bootstrap['CHARSET'] : $model_cache['Template']['charset'] )
+		);
+
+
+		
 		/**
 		* Rendering and dispatching the template
 		*/

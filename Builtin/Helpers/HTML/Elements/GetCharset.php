@@ -62,7 +62,7 @@ class GetCharset extends \Tipui\Builtin\Helpers\HTML\Elements
 		//print_r( $rs ); exit;
 
 		/**
-		* note: If key is invalid, returns stdClass Object with propertie "invalid_key".
+		* note: If key is invalid, returns stdClass Object with property "invalid_key".
 		*/
 		if( !isset( $rs['Template']['charset'] ) )
 		{
