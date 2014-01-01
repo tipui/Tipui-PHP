@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-25 04:17:00
+* @updated: 2013-12-29 21:56:00
 */
 
 namespace Tipui;
@@ -158,7 +158,7 @@ class Core
 		/**
 		* Defines Storage path for environment data cache files.
 		*/
-		$this -> cache_storage_env_dir = TIPUI_APP_PATH . self::STORAGE_FOLDER . DIRECTORY_SEPARATOR . self::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR;
+		$this -> cache_storage_env_dir = $this -> CacheStorageEnvPath();
 
 
 		/**
@@ -214,6 +214,14 @@ class Core
 	}
 
 	/**
+	* Builds the path of cache files of environment settings.
+	*/
+    public function CacheStorageEnvPath()
+    {
+		return TIPUI_APP_PATH . Core::STORAGE_FOLDER . DIRECTORY_SEPARATOR . Core::CONF_FOLDER_ENV . DIRECTORY_SEPARATOR;
+	}
+
+	/**
 	* Clear properties.
 	*/
     public function ResetProperties()
@@ -222,7 +230,6 @@ class Core
 		$this -> fs      = null;
 		$this -> core_methods_cached_data = null;
 		$this -> core_cached_data         = null;
-		$this -> session = null;
 
 		return null;
 	}
@@ -337,9 +344,9 @@ class Core
 
 		/**
 		* Check if Core ENV data cache file exists.
-		* If exists, interrupt execution of this method.
+		* If exists, interrupts execution of this method inside the conditional.
 		* 
-		*/		
+		*/
 		if( !$env_json['CACHE_REGENERATE'] and $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CACHE_FILE_EXTENSION ) )
 		{
 
@@ -369,6 +376,12 @@ class Core
 			unset( $script_path, $env_json, $app_conf_path, $env );
 
 			/**
+			* Saves methods results to cache
+			*/
+			$this -> SaveToCache();
+
+			/**
+			* Data was retrieve from cache.
 			* Force exit this method execution.
 			*/
 			return null;
@@ -429,8 +442,38 @@ class Core
 		*/
 		$this -> fs = null;
 
+		/**
+		* Saves methods results to cache
+		*/
+		$this -> SaveToCache();
+
+
 		return null;
 	}
+
+
+
+	/**
+	* Executes and saves Core required initialization methods to cache.
+	*/
+    private function SaveToCache()
+    {
+
+		/**
+		* Saves the Interface type information.
+		* If true, is running under CLI (Command Line Interface)
+		*/
+		$this -> SetMethodDataCache( 'IsCliMode' );
+
+		/**
+		* Saves data about URL and/or parameters and routing.
+		*/
+		$this -> SetMethodDataCache( 'Routing' );
+
+		return null;
+	}
+
+
 
 	/**
 	* Loads and starts autoloading.
@@ -587,20 +630,12 @@ class Core
 	}
 
 	/**
-	* Detect if script is running over HTTP or CLI
-	*/
-    public function CheckCliMode()
-    {
-		$this -> sapi_is_cli = ( php_sapi_name() == 'cli' ) ? true : false;
-	}
-
-	/**
 	* Retrieves the cli mode
 	* (boolean)
 	*/
-    public function IsCliMode()
+    private function IsCliMode()
     {
-		return $this -> sapi_is_cli;
+		return $this -> sapi_is_cli = ( php_sapi_name() == 'cli' ) ? true : false;
 	}
 
 	/**
@@ -627,7 +662,7 @@ class Core
 		$c = new Builtin\Libs\Request;
 		$c -> SetDefaults();
 		//$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] ); [deprecated]
-		$c -> SetSapiMode( $this -> IsCliMode() );
+		$c -> SetSapiMode( $this -> sapi_is_cli );
 		$c -> SetURLParts( $this -> env['URL']['HREF_BASE'] );
 		/**
 		* Debug purposes
@@ -654,7 +689,7 @@ class Core
 	/**
 	* Prepare routing
 	*/
-    public function Routing()
+    private function Routing()
     {
 
 		/**
@@ -1056,6 +1091,15 @@ class Core
 		//print_r( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] ); exit;
 
 		/**
+		* Prevents accessing this method directly.
+		*/
+		$reflect = new \ReflectionClass($this);
+		if( $reflect->getName() != __CLASS__ )
+		{
+			throw new \Exception('Access to method "' . __METHOD__ . '" is stricted by ' . __CLASS__ . '. Use \Tipui\Core::GetConf()->GetMethodDataCache() instead');
+		}
+
+		/**
 		* Creates new instance of Cache library if not exists.
 		*/
 		( $this -> cache == null ) ? $this -> cache = new Libs\Cache : null;
@@ -1069,10 +1113,6 @@ class Core
 			throw new \Exception('Core method cache storage in sqlite not available.');
 		}
 		*/
-
-		//$this -> core_methods_cached_data[$method] = $this -> cache -> Get( array( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] => array( 'key' => 'Tipui::Core::' . $method ) ) );
-
-		//$this -> core_methods_cached_data[$method] = $this -> cache -> Get( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'], 'Tipui::Core::' . $method );
 
 		$this -> core_methods_cached_data[$method] = $this -> cache -> Get( 'Tipui::Core::' . $method );
 		//var_dump( $this -> core_methods_cached_data[$method] ); exit;
@@ -1141,8 +1181,14 @@ class Core
 	/**
 	* Stores methods results to cache (session)
 	*/
-	public function SetMethodDataCache( $method )
+	private function SetMethodDataCache( $method )
 	{
+
+		/*
+		* [review]
+		* Maybe necessary check if method belongs to class Core()
+		*/
+
 
 		/**
 		* Debug purposes

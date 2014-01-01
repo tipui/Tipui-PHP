@@ -7,13 +7,14 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-26 03:47:00
+* @updated: 2013-12-29 21:56:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
 
 /**
 * [important and insights]
+ - Documents the Core::GetEnv()
  - Cache mode options set (Docs/Builtin/Libs/Cache) Cache->Cookie(time, time_mode...)->Set();
  - Core methods
  - Check cache integrity (cookies, sessions)
@@ -112,18 +113,12 @@ if( !defined( 'TIPUI_PATH' ) )
 	$c = new \Tipui\Core;
 
 	/**
-	* Check if running from CLI (command line) or HTTP
-	* For retrieve, run the method IsCliMode()
-	*/
-	$c -> CheckCliMode();
-
-	/**
 	* Starts autoloader
 	*/
 	$c -> Autoloader();
 
 	/**
-	* Loads settings
+	* Loads settings and saves methods Core::IsCliMode() and Core::Routing() results to cache
 	*/
 	$c -> LoadSettings();
 
@@ -140,37 +135,12 @@ if( !defined( 'TIPUI_PATH' ) )
 	//print_r($env_templates); exit;
 
 	/**
-	* Stores the SAPI mode (CLI or HTTP)
-	*/
-	//$c -> IsCliMode();
-	$c -> SetMethodDataCache( 'IsCliMode' );
-
-	/**
-	* Debug purposes
-	* Retrieves Core request cached data.
-	*/
-	//$is_cli_mode = $c -> GetMethodDataCache( 'IsCliMode' );
-	//var_dump( $is_cli_mode ); exit;
-
-	/**
 	* From this point, all methods of Core class requires Core::GetENV, Core::IsCliMode and Autoloader.
 	*/
 
 	/**
-	* Debug purposes
-	* Retrieves Core request cached data.
-	*/
-	//$request = $c -> GetMethodDataCache( 'Request' );
-	//print_r( $request ); exit;
-
-	/**
-	* Stores Core routing result to cache.
-	*/
-	//$c -> Routing();
-	$c -> SetMethodDataCache( 'Routing' );
-
-	/**
 	* Retrieves Core routing cached data.
+	* @see Core::LoadSettings(), Core::SaveToCache()
 	*/
 	$module = $c -> GetMethodDataCache( 'Routing' );
 
@@ -193,7 +163,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	method_exists( $clss, 'Prepare' )  ? $m -> Prepare()  : '';
 
 	/**
-	* Rendering template if exists View method
+	* Rendering template if exists View() method
 	*/
 	if( method_exists( $clss, 'View' ) )
 	{
