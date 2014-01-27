@@ -1,11 +1,12 @@
 <?php
 $rs = array (
 	'type'           => 'text',
-	'MinLength'      => 5,
-	'MaxLength'      => 25,
+	'min_length'     => 5,
+	'max_length'     => 25,
 	'size'           => 25,
-	'validation'     => 'text',
+	//'validation'     => 'Number',
 	'value'          => '',
-	'default'        => '',
-	'pre-filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( false ) ),
+	'default'        => 12345,
+	//'pre_filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'NumbersOnly' ) ),
+	'pre_filter'     => 'Number',
 );

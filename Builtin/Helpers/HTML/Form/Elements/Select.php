@@ -8,12 +8,13 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 02:13:00
+* @updated: 2014-01-19 12:23:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
 
-use Tipui\Builtin\Libs as Libs;
+use Tipui\Builtin\Libs\Strings as Strings;
+use Tipui\Builtin\Libs\DataRules as DataRules;
 
 class Select extends \Tipui\Builtin\Helpers\HTML\Form
 {
@@ -52,18 +53,25 @@ class Select extends \Tipui\Builtin\Helpers\HTML\Form
 
 		$rs .= '>';
 
-		$check = false;
+		$check = null;
 
-		if( $property['value'] != '' )
+		if( !empty( $property[DataRules::VALUE] ) )
 		{
-
-			$check = (string)$property['value'];
-			//echo gettype($check); exit;
+			/**
+			* [notice] 
+			* The old framework was casting to string (string)..
+			*/
+			$check = (string)$property[DataRules::VALUE];
+			//echo $check . ':' . gettype($check); exit;
 		}else{
 
-			if( $property['default'] )
+			if( isset( $property[DataRules::DEFAULTS] ) )
 			{
-				$check = (string)$property['default'];
+				/**
+				* [notice] 
+				* The old framework was casting to string (string)..
+				*/
+				$check = (string)$property[DataRules::DEFAULTS];
 			}
 
 		}
@@ -72,51 +80,50 @@ class Select extends \Tipui\Builtin\Helpers\HTML\Form
 		* [review]
 		* Multiple selected options not available
 		*/
-		if( isset( $property['options'] ) and is_array($property['options']) and count($property['options']) > 0 )
+		if( isset( $property[DataRules::OPTIONS] ) && is_array( $property[DataRules::OPTIONS] ) && !empty( $property[DataRules::OPTIONS] ) )
 		{
 			//print_r($data['options']);
-			foreach( $property['options'] as $k => $v )
+			foreach( $property[DataRules::OPTIONS] as $k => $v )
 			{
 				if( !is_array( $v ) )
 				{
 					$rs .= '<option';
 					$rs .= ' value="' . $k . '"';
-				}else{
-					if( isset( $v['optgroup'] ) )
+
+					if( !empty( $check ) && $check == $k )
 					{
-						$rs .= '<optgroup label="' . $v['optgroup']  . '">';
+						$rs .= ' selected';
 					}
-				}
 
-				if( !is_array( $v ) and gettype($check) != 'boolean' and $check == $k )
-				{
-					$rs .= ' selected';
-				}
-
-				if( !is_array( $v ) )
-				{
 					$rs .= '>';
 					$rs .= $v;
 					$rs .= '</option>';
 				}else{
-					if( isset( $v['optgroup'] ) )
+					if( !empty( $v ) )
 					{
-						if( isset( $v['options'] ) and is_array( $v['options'] ) and count( $v['options'] ) > 0 )
+						foreach( $v as $optgroup => $options )
 						{
-							foreach( $v['options'] as $k1 => $v1 )
+
+							$rs .= '<optgroup label="' . $optgroup  . '">';
+
+							foreach( $options as $value => $label )
 							{
+
 								$rs .= '<option';
-								$rs .= ' value="' . $k1 . '"';
-								if( gettype($check) != 'boolean' and $check == $k1 )
+								$rs .= ' value="' . $value . '"';
+								if( !empty( $check ) && $check == $value )
 								{
 									$rs .= ' selected';
 								}
 								$rs .= '>';
-								$rs .= $v1;
+								$rs .= $label;
 								$rs .= '</option>';
+
 							}
+
+							$rs .= '</optgroup>';
+
 						}
-						$rs .= '</optgroup>';
 					}
 				}
 			}

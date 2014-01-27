@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 03:07:00
+* @updated: 2014-01-03 04:09:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -17,6 +17,7 @@ use \Tipui\Builtin\Libs\DataRules as DataRules;
 
 /**
 * Form properties and settings library.
+* @see \Tipui\Builtin\Helpers\HTML\Form
 */
 class Form
 {
@@ -24,7 +25,12 @@ class Form
 	/**
 	* Handles form action
 	*/
-	protected static $action = null;
+	protected static $action     = null;
+
+	/**
+	* Handles form method
+	*/
+	protected static $method     = null;
 
 	/**
 	* Handles form parameters

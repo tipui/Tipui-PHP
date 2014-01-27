@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-10-04 13:57:00
+* @updated: 2014-01-03 10:24:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML;
@@ -57,7 +57,7 @@ class Factory
 		* If $library have backslash (\), assumes the entire name as full path (namespace) of called library.
 		* This is usefull for cases when library not exists in builtin or override folders but exists in the app folder.
 		*/
-		$reflect  = new \ReflectionClass( ( strpos( $library, '\\' ) ? $library : __NAMESPACE__ . '\\' . $library ) . '\\' . $name );
+		$reflect  = new \ReflectionClass( ( ( strpos( $library, '\\' ) !== FALSE ) ? $library : __NAMESPACE__ . '\\' . $library ) . '\\' . $name );
 		$instance = $reflect->newInstance();
 
 		/**

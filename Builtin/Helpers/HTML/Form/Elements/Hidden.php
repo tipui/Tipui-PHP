@@ -8,12 +8,13 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 02:13:00
+* @updated: 2014-01-05 18:30:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
 
-use Tipui\Builtin\Libs as Libs;
+use Tipui\Builtin\Libs\Strings as Strings;
+use Tipui\Builtin\Libs\DataRules as DataRules;
 
 class Hidden extends \Tipui\Builtin\Helpers\HTML\Form
 {
@@ -22,6 +23,12 @@ class Hidden extends \Tipui\Builtin\Helpers\HTML\Form
     {
 
 		$rs = '<input type="hidden"' . self::ParametersAdd() . 'name="' . $name;
+
+		/**
+		* Holds the $name_as_array value as formated string
+		* @see \Tipui\Builtin\Libs\DataValidation\Sanitize
+		*/
+		$name_array_as_string = null;
 
 		/**
 		* name property
@@ -37,6 +44,12 @@ class Hidden extends \Tipui\Builtin\Helpers\HTML\Form
 				{
 					$rs .= '[' . $v . ']';
 				}
+
+				/**
+				* Formating for ArrayBaseTree
+				* @see \Tipui\Builtin\Libs\DataValidation\Sanitize
+				*/
+				$name_array_as_string = implode( '/', self::$name_as_array );
 			}
 
 		}
@@ -46,47 +59,52 @@ class Hidden extends \Tipui\Builtin\Helpers\HTML\Form
 		*/
 		$rs .= '" value="';
 
-		if( !is_array( $property['value'] ) )
+
+		if( !empty( $property[DataRules::VALUE] ) )
 		{
-
 			/**
-			* If value is empty, check for default property.
-			* For both, filter to avoid HTML injections.
+			* [review]
+			* Must review if is realy necessary to escape string from html injections.
+			* Mostly of all parameters have the optional pre-filter that already applies the String::Escape()
 			*/
-			if( !empty( $property['value'] ) )
+			if( !is_array( $property[DataRules::VALUE] ) )
 			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
-
+				$rs .= Strings::Escape( $property[DataRules::VALUE], 'quotes' );
 			}else{
-				//$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
-				$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
+
+				/**
+				* Debug purposes
+				*/
+				//echo implode( '/', self::$name_as_array ) . PHP_EOL;
+				//echo __FILE__ . PHP_EOL; print_r( $property[DataRules::VALUE] ); exit;
+
+				/**
+				* 
+				* @see \Tipui\Builtin\Libs\DataValidation\Sanitize
+				*/
+				if( !empty( $name_array_as_string ) )
+				{
+					if( isset( $property[DataRules::VALUE][$name_array_as_string] ) )
+					{
+						$rs .= Strings::Escape( $property[DataRules::VALUE][$name_array_as_string], 'quotes' );
+					}
+				}else{
+					/**
+					* [review] Must test user input for securitie reasons.
+					*/
+					throw new \Exception('Value is array, but $name_array_as_string is empty.');
+				}
 
 			}
 
 		}else{
 
-			/**
-			* Value is array
-			*/
-
-			if( self::$name_as_array )
+			if( !is_array( $property[DataRules::DEFAULTS] ) )
 			{
-
-				self::$ArrayVal = '';
-				self::ArrayVal( $property['value'] );
-				
-				if( self::$ArrayVal == '' )
-				{
-					if( isset( $property['default'] ) )
-					{
-						$rs .= $property['default'];
-					}
-				}else{					
-					$rs .= Libs\Strings::Escape( self::$ArrayVal, 'quotes' );
-				}
-
+				$rs .= Strings::Escape( $property[DataRules::DEFAULTS], 'quotes' );
 			}else{
-				$rs .= Libs\Strings::Escape( $property['default'], 'quotes' );
+
+				throw new \Exception('Default as array, not supported');
 
 			}
 

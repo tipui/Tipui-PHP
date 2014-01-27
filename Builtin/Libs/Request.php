@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 21:00:00
+* @updated: 2014-01-23 12:50:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -17,6 +17,15 @@ use Tipui\Builtin\Libs\Strings as Strings;
 
 class Request
 {
+
+	/**
+	* Constants that defines valid methods
+	*/
+	const METHOD_GET    = 'GET';
+	const METHOD_POST   = 'POST';
+	const METHOD_FILES  = 'FILES';
+	const METHOD_PUT    = 'PUT';
+	const METHOD_DELETE = 'DELETE';
 
 	/**
 	* Parameter defined by model/user config settings

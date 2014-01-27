@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-07 21:06:00
+* @updated: 2014-01-23 11:44:00
 *
 * @see: \Tipui\Builtin\Helpers\HTML\Form\GetElementProperty;
 */
@@ -26,9 +26,9 @@ class GetElement extends \Tipui\Builtin\Libs\Form
 		/**
 		* [code]self::$parameters[/code] must be an valid array
 		*/
-		if( self::$parameters == null )
+		if( self::$parameters === null )
 		{
-			throw new \Exception('Form::$parameters is null');
+			return null;
 		}
 
 		/**

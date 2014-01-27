@@ -8,19 +8,20 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 02:13:00
+* @updated: 2014-01-05 18:30:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
 
-use Tipui\Builtin\Libs as Libs;
+use Tipui\Builtin\Libs\Strings as Strings;
+use Tipui\Builtin\Libs\DataRules as DataRules;
 
 class Checkbox extends \Tipui\Builtin\Helpers\HTML\Form
 {
 
 	public static function Add( $name, $property )
     {
-		if( isset( $property['options'] ) )
+		if( isset( $property[DataRules::OPTIONS] ) )
 		{
 			return self::GroupingOptionProperty( $name, $property );
 		}
@@ -50,19 +51,19 @@ class Checkbox extends \Tipui\Builtin\Helpers\HTML\Form
 		/**
 		* value field
 		*/
-		if( !is_array( $property['value'] ) )
+		if( !is_array( $property[DataRules::VALUE] ) )
 		{
 			/**
-			* If value is empty, check for default property and ExactValue.
+			* If value is empty, check for default property and exact_value.
 			* For value, must be filtered to avoid HTML injections.
 			*/
-			if( !empty( $property['value'] ) )
+			if( !empty( $property[DataRules::VALUE] ) )
 			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
-			}else if( !empty( $property['default'] ) ){
-				$rs .= $property['default'];
+				$rs .= Strings::Escape( $property[DataRules::VALUE], 'quotes' );
+			}else if( isset( $property[DataRules::DEFAULTS] ) and !empty( $property[DataRules::DEFAULTS] ) ){
+				$rs .= $property[DataRules::DEFAULTS];
 			}else{
-				$rs .= $property['ExactValue'];
+				$rs .= $property[DataRules::EXACT_VALUE];
 			}
 		}else{
 
@@ -88,10 +89,10 @@ class Checkbox extends \Tipui\Builtin\Helpers\HTML\Form
 		*/
         $check = false;
 
-		if( !empty( $property['value'] ) )
+		if( !empty( $property[DataRules::VALUE] ) )
 		{
 			$rs .= ' checked';
-		}else if( !empty( $property['default'] ) )
+		}else if( isset( $property[DataRules::DEFAULTS] ) && !empty( $property[DataRules::DEFAULTS] ) )
 		{
 			$rs .= ' checked';
 		}

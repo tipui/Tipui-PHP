@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-15 02:54:00
+* @updated: 2014-01-05 03:17:00
 */
 
 namespace Tipui\Builtin\Libs\Strings;
@@ -26,7 +26,7 @@ class ValidMailAddress
         $rule .= '*[.]([0-9,a-z,A-Z]){2}([0-9,a-z,A-Z])?$/';
 
         if( preg_match( $rule, $str ) ){
-            return true;
+            return $str;
         }else{
             return false;
         }

@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-29 21:56:00
+* @updated: 2014-01-04 02:36:00
 */
 
 namespace Tipui;
@@ -750,14 +750,14 @@ class Core
 			/**
 			* Scanning into main Modules folder.
 			*/
-			!$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $clss );
-			if( !$rs or isset( $rs[404] ) )
+			if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $clss ) )
 			{
 
 				/**
 				* Debug purposes
 				*/
-				//echo $module_uri; exit;
+				//echo $module_uri; //exit;
+				//print_r( $rs );
 
 				/**
 				* Scanning routing module.
@@ -778,9 +778,12 @@ class Core
 			/**
 			* If model or routing is not found, loads 404 (not found) Module
 			*/
-			if( ( !$rs or isset( $rs[404] ) ) and !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
+			if( !$rs )
 			{
-				throw new \Exception('404/NotFound Module is invalid or not found. Check MODULES.php in /app/config/env/');
+				if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
+				{
+					throw new \Exception('404/NotFound Module is invalid or not found. Check MODULES.php in /app/config/env/');
+				}
 			}
 
 		}
@@ -800,7 +803,7 @@ class Core
 		* Debug purposes
 		*/
 		//var_dump( $rs ); exit;
-		//print_r( $rs ); exit;
+		//echo PHP_EOL . PHP_EOL; print_r( $rs ); echo PHP_EOL . __FILE__ . exit;
 
 		/**
 		* Include the module file
@@ -828,7 +831,8 @@ class Core
     {
 
 		/**
-		* folders levels
+		* Folders levels limit
+		* @see: Docs/Core/GetConf/URL
 		*/
 		$i           = $this -> env['URL']['FOLDER_LEVELS'];
 
@@ -852,18 +856,21 @@ class Core
 		*/
 		$path_params = false;
 
+		/**
+		* Builds the base path
+		*/
+		$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . TIPUI_CORE_ENV_FILE_EXTENSION;
+
 		while( $i > 0 and !$goal and !empty( $clss ) )
 		{
 
 			if( $path_base == self::APP_FOLDER_MODEL )
 			{
 
-				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . TIPUI_CORE_ENV_FILE_EXTENSION;
-
 				/**
 				* Debug purposes
 				*/
-				//echo PHP_EOL . $path . ': ';
+				//echo PHP_EOL . PHP_EOL . $path . ': ';
 
 				if( file_exists( $path ) )
 				{
@@ -884,90 +891,7 @@ class Core
 					* Debug purposes
 					*/
 					//$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
-					//echo 'ng [next] ' . $clss;
-
-					/**
-					* Debug purposes
-					*/
-					//echo PHP_EOL . 'not exists';
-
-					/**
-					* Mounting the folder based on the path nomenclature
-					*/
-					$path_module_dir = dirname( $path );
-
-					/**
-					* Mounting the parent module file path based on the base path of original nomenclature from $path
-					*/
-					$parent_module_file_path = $path_module_dir . TIPUI_CORE_ENV_FILE_EXTENSION;
-
-					/**
-					* Debug purposes
-					*/
-					//echo PHP_EOL . $parent_module_file_path;
-
-					/**
-					* Checking if file exists
-					*/
-					if( file_exists( $parent_module_file_path ) )
-					{
-
-						/**
-						* Debug purposes
-						*/
-						//echo PHP_EOL . 'parent module file exists';
-
-						/**
-						* URL is potentially valid. Must set the $goal to TRUE. 
-						* The next validation must be done in the Start.php file by loading the module and check if requiring parameters.
-						* If the module not requires parameters, must return 404
-						*/
-
-					}else{
-
-						/**
-						* Debug purposes
-						*/
-						//echo PHP_EOL . 'parent module file NOT exists';
-						//echo PHP_EOL . $path_module_dir;
-
-						/**
-						* Checking if folder exists
-						*/
-						if( file_exists( $path_module_dir ) )
-						{
-							/**
-							* Debug purposes
-							*/
-							//echo PHP_EOL . '[404] parent module dir exists';
-
-							/**
-							* URL is invalid. Must return 404 HTTP Status
-							*/
-
-							/**
-							* Breaks each subpath into array $path_params.
-							* Rename $clss, removing the subpath until find the proper file path.
-							*/
-							//$path_params[] = substr( $clss, strrpos( $clss, DIRECTORY_SEPARATOR ) + 1 );
-							//$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
-
-							$rs[404] = true;
-
-						}else{
-							/**
-							* Debug purposes
-							*/
-							//echo PHP_EOL . 'parent module dir NOT exists';
-
-							/**
-							* URL is partially invalid. Must continue checking the parents
-							*/
-
-						}
-
-					}
-					//exit;
+					//echo PHP_EOL . 'ng [next] ' . $clss;
 				}
 
 			}else{
@@ -1003,7 +927,7 @@ class Core
 
 			}
 
-			if( !$goal or isset( $rs[404] ) )
+			if( !$goal )
 			{
 				/**
 				* Debug purposes
@@ -1018,12 +942,10 @@ class Core
 				$clss = substr( $clss, 0, strrpos( $clss, DIRECTORY_SEPARATOR ) );
 
 				/**
-				* Interrupt the loop if 404 was found
+				* Rebuilding new path
 				*/
-				if( isset( $rs[404] ) )
-				{
-					break;
-				}
+				unset( $path );
+				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 			}else{
 				/**
@@ -1034,7 +956,7 @@ class Core
 				/**
 				* If $path_params is array, must reverse the indexes order.
 				*/
-				//$rs['params'] = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
+				$rs['params'] = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
 
 				/**
 				* Debug purposes
@@ -1047,9 +969,18 @@ class Core
 			*/
 			//echo PHP_EOL;
 
+			/**
+			* Decrementing the folders level limit
+			* @see: Docs/Core/GetConf/URL
+			*/
 			$i--;
 
 		}
+
+		/**
+		* Clear used variables
+		*/
+		unset( $path, $routing, $i );
 
 		/**
 		* If $path_params is array, must reverse the indexes order.
@@ -1065,6 +996,11 @@ class Core
 		}
 
 		/**
+		* Clear used variables
+		*/
+		unset( $path_params );
+
+		/**
 		* Debug purposes
 		*/
 		//echo PHP_EOL . PHP_EOL;
@@ -1073,9 +1009,7 @@ class Core
 		//echo PHP_EOL . 'path: ' . $path;
 		//exit;
 
-		unset( $routing, $i );
-
-		return ( $goal or isset( $rs[404] ) ) ? $rs : false;
+		return ( ( $goal === true ) ? $rs : false );
 
 	}
 

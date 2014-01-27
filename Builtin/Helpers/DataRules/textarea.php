@@ -1,12 +1,11 @@
 <?php
 $rs = array (
 	'type'           => 'textarea',
-	'MinLength'      => 3,
-	'MaxLength'      => 150,
+	'min_length'     => 3,
+	'max_length'     => 150,
 	'cols'           => 25,
 	'rows'           => 3,
-	'validation'     => 'text',
 	'value'          => '',
 	'default'        => '',
-	'pre-filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( false ) ),
+	'pre_filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( 'form' ) ),
 );

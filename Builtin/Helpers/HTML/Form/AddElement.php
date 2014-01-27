@@ -8,13 +8,17 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-07 21:06:00
+* @updated: 2014-01-05 18:30:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
 
-use Tipui\Builtin\Libs as Libs;
+use Tipui\Builtin\Libs\Form as Form;
+use Tipui\Builtin\Libs\DataRules as DataRules;
 
+/**
+* [review] Include the MAX_FILE_SIZE parameter
+*/
 class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
 {
 
@@ -26,20 +30,21 @@ class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
 		/**
 		* Debug purposes
 		*/
-		self::$parameter = Libs\Form::GetElement( $name );
+		self::$parameter = Form::GetElement( $name );
 
 		/**
 		* For array types (multiple)
 		*/
-        if( is_array( self::$parameter['type'] ) )
+        if( is_array( self::$parameter[DataRules::TYPE] ) )
         {
 			// [review]
+			/*
             foreach( self::$parameter['type'] as $k => $type )
             {
                 $arr['type']        = $type;
                 $arr['size']        = self::$parameter['size'][$k];
-                $arr['MaxLength']   = self::$parameter['MaxLength'][$k];
-                $arr['MinLength']   = self::$parameter['MinLength'][$k];
+                $arr['max_length']  = self::$parameter['max_length'][$k];
+                $arr['min_length']  = self::$parameter['min_length'][$k];
                 $arr['value']       = self::$parameter['value'][$k];
                 $arr['default']     = self::$parameter['default'][$k];
                 $arr['options']     = self::$parameter['options'][$k];
@@ -47,6 +52,17 @@ class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
                 $rs[] = self::AddEntitie( $name . '[' . self::$parameter['names'][$k] . ']', $arr );
 				unset($arr);
             }
+			*/
+
+            foreach( self::$parameter[DataRules::TYPE] as $k => $v )
+            {
+				foreach( self::$parameter as $k2 => $v2 )
+				{
+					$arr[$k2] = $v2;
+					$rs[] = self::AddEntitie( $name . '[' . self::$parameter[DataRules::NAME][$k] . ']', $arr );
+					unset($arr);
+				}
+			}
 
         }else{
 			/**
@@ -63,7 +79,15 @@ class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
 		self::SetTagParams( false );
 		self::SetNameAsArray( null );
 
-		return $rs;
+		$c = new \stdClass();
+		$c -> html  = $rs;
+		if( isset( self::$parameter[DataRules::OPTIONS] ) )
+		{
+			$c -> {DataRules::OPTIONS}  = self::$parameter[DataRules::OPTIONS];
+		}
+		$c -> error = isset( self::$parameter[DataRules::ERROR] ) ? self::$parameter[DataRules::ERROR] : false;
+
+		return $c;
 	}
 
 	/**

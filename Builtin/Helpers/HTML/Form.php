@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 02:18:00
+* @updated: 2014-01-22 11:40:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML;
@@ -46,6 +46,12 @@ class Form
 	* i.e. [code]<input id="foo"...[/code]
 	*/
 	protected static $tag_params = false;
+
+	/**
+	* Holds the URL PARAM_NAME
+	* @see self::SetParam, self::AddParam, Core::GetConf()
+	*/
+	protected static $url_param = null;
 
 
 

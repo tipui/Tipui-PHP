@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-08 17:33:00
+* @updated: 2014-01-22 20:30:00
 */
 
 namespace Tipui\Builtin\Libs;
@@ -19,9 +19,25 @@ class DataRules
 {
 
 	/**
+	* Handles the element name parameter
+	*/
+	const NAME           = 'name';
+
+	/**
+	* Handles the rule name parameter
+	* [review] [deprecated]
+	*/
+	const RULE           = 'rule';
+
+	/**
+	* Handles the required parameter
+	*/
+	const REQUIRED       = 'required';
+
+	/**
 	* Handles the element value parameter
 	*/
-	const VALUE          = 'VALUE';
+	const VALUE          = 'value';
  
 	/**
 	* Defines the default value
@@ -34,6 +50,30 @@ class DataRules
 	const TYPE           = 'type';
 
 	/**
+	* Multiple choices elements.
+	* Defines the exact quantity of choices.
+	*/
+	const SELECT_EXACT   = 'select_exact';
+
+	/**
+	* Multiple choices elements.
+	* Defines the maximum choices required.
+	*/
+	const SELECT_MIN     = 'select_min';
+
+	/**
+	* Multiple choices elements.
+	* Defines the maximum choices required.
+	*/
+	const SELECT_MAX     = 'select_max';
+
+	/**
+	* Element type as array
+	* [review] [deprecated]
+	*/
+	const MULTIPLE       = 'multiple';
+
+	/**
 	* Defines the element/field size
 	*/
 	const SIZE           = 'size';
@@ -44,6 +84,11 @@ class DataRules
 	const OPTIONS        = 'options';
 
 	/**
+	* For select optgroup
+	*/
+	const OPTGROUP       = 'optgroup';
+
+	/**
 	* Validation type (int, float, char, date, time, datetime, upload)
 	*/
 	const VALIDATION     = 'validation';
@@ -51,18 +96,25 @@ class DataRules
 	/**
 	* Filter the value parameter before assign to data rule parameter 'value'
 	*/
-	const PRE_FILTER     = 'pre-filter';
+	const PRE_FILTER     = 'pre_filter';
 
 	/**
 	* The exact value parameter
 	*/
-	const EXACTVALUE     = 'ExactValue';
+	const EXACT_VALUE    = 'exact_value';
 
 	/**
 	* The value parameter string length
 	*/
-	const MINLENGTH      = 'MinLength';
-	const MAXLENGTH      = 'MaxLength';
+	const MIN_LENGTH     = 'min_length';
+	const MAX_LENGTH     = 'max_length';
+	const EXACT_LENGTH   = 'exact_length';
+
+	/**
+	* The error parameter, if error exists after sanitizes
+	* @see: \Tipui\Builtin\Libs\DataValidation::Sanitize()
+	*/
+	const ERROR          = 'error';
 
 	/**
 	* For textarea type
@@ -83,6 +135,8 @@ class DataRules
 	/**
 	* Media dimensions (jpg, gif, bmp, swf, etc)
 	*/
+	const EXACT_WIDTH    = 'exact_width';
+	const EXACT_HEIGHT   = 'exact_height';
 	const MIN_WIDTH      = 'min_width';
 	const MAX_WIDTH      = 'max_width';
 	const MIN_HEIGHT     = 'min_height';
@@ -171,7 +225,7 @@ class DataRules
 		* The rule's state.
 		* (boolean) true: is required, false: not required
 		*/
-		self::$rules[$rule]['required'] = $required;
+		self::$rules[$rule][self::REQUIRED] = $required;
 
 		return self::$rules[$rule];
 

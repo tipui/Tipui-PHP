@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-16 20:11:00
+* @updated: 2014-01-21 12:57:00
 */
 
 namespace Tipui\Builtin\Libs\Request;
@@ -66,7 +66,7 @@ class Extract extends Libs\Request
 			}
 
 			// if the first string is the parameter argumentor (?), means that is a normal URL (ie: http://foo.bar/?p=x)
-			self::$mod_rewrite = ( substr( self::$uri[0], 0, 1 ) == self::$url_param_argumentor ) ? false: true;
+			self::$mod_rewrite = ( substr( self::$uri[0], 0, 1 ) == self::$url_param_argumentor or self::$rq_method == 'POST' ) ? false: true;
 
 			return self::ParametersFromHTTP();
 

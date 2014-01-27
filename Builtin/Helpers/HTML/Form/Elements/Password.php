@@ -8,19 +8,26 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-11-16 16:45:00
+* @updated: 2014-01-05 18:30:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
 
-use Tipui\Builtin\Libs as Libs;
+use Tipui\Builtin\Libs\Strings as Strings;
+use Tipui\Builtin\Libs\DataRules as DataRules;
 
 class Password extends \Tipui\Builtin\Helpers\HTML\Form
 {
 
 	public static function Add( $name, $property )
     {
-		$rs  = '<input type="' . $property['type'] . '"' . self::ParametersAdd() . 'name="' . $name;
+		$rs  = '<input type="password"' . self::ParametersAdd() . 'name="' . $name;
+
+		/**
+		* Holds the $name_as_array value as formated string
+		* @see \Tipui\Builtin\Libs\DataValidation\Sanitize
+		*/
+		$name_array_as_string = null;
 
 		/**
 		* name property
@@ -35,6 +42,12 @@ class Password extends \Tipui\Builtin\Helpers\HTML\Form
 				{
 					$rs .= '[' . $v . ']';
 				}
+
+				/**
+				* Formating for ArrayBaseTree
+				* @see \Tipui\Builtin\Libs\DataValidation\Sanitize
+				*/
+				$name_array_as_string = implode( '/', self::$name_as_array );
 			}
 		}
 		
@@ -43,29 +56,71 @@ class Password extends \Tipui\Builtin\Helpers\HTML\Form
 		*/
 		$rs .= '" value="';
 
-		if( !is_array( $property['value'] ) )
+
+		if( !empty( $property[DataRules::VALUE] ) )
 		{
 			/**
-			* If value is empty, check for default property.
-			* Value must be filtered to avoid HTML injections.
+			* [review]
+			* Must review if is realy necessary to escape string from html injections.
+			* Mostly of all parameters have the optional pre-filter that already applies the String::Escape()
 			*/
-			if( !empty( $property['value'] ) )
+			if( !is_array( $property[DataRules::VALUE] ) )
 			{
-				$rs .= Libs\Strings::Escape( $property['value'], 'quotes' );
+				$rs .= Strings::Escape( $property[DataRules::VALUE], 'quotes' );
 			}else{
-				$rs .= $property['default'];
+
+				/**
+				* Debug purposes
+				*/
+				//echo implode( '/', self::$name_as_array ) . PHP_EOL;
+				//echo __FILE__ . PHP_EOL; print_r( $property[DataRules::VALUE] ); exit;
+
+				/**
+				* 
+				* @see \Tipui\Builtin\Libs\DataValidation\Sanitize
+				*/
+				if( !empty( $name_array_as_string ) )
+				{
+					if( isset( $property[DataRules::VALUE][$name_array_as_string] ) )
+					{
+						$rs .= Strings::Escape( $property[DataRules::VALUE][$name_array_as_string], 'quotes' );
+					}
+				}else{
+					/**
+					* [review] Must test user input for securitie reasons.
+					*/
+					throw new \Exception('Value is array, but $name_array_as_string is empty.');
+				}
+
 			}
+
 		}else{
-			/**
-			* value is array
-			*/
-			throw new \Exception('Input text value as array not implemented');
+
+			if( !is_array( $property[DataRules::DEFAULTS] ) )
+			{
+				$rs .= Strings::Escape( $property[DataRules::DEFAULTS], 'quotes' );
+			}else{
+
+				throw new \Exception('Default as array, not supported');
+
+			}
+
 		}
 
 		/**
-		* size, maxLength, ExactLength properties
+		* size
 		*/
-		$rs .= '" size="' . $property['size'] . '" maxLength="' . ( ( isset( $property['MaxLength'] ) ) ? $property['MaxLength'] : $property['ExactLength'] ) . '"';
+		$rs .= '" size="' . $property[DataRules::SIZE] . '"';
+
+		/**
+		* maxLength
+		*/
+		$v = ( ( isset( $property[DataRules::MAX_LENGTH] ) ) ? $property[DataRules::MAX_LENGTH] : ( isset( $property[DataRules::EXACT_LENGTH] ) ? $property[DataRules::EXACT_LENGTH] : null ) );
+		if( !empty( $v ) )
+		{
+			$rs .= ' maxLength="' . $v . '"';
+		}
+		unset( $v );
 
 		/**
 		* class property

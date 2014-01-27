@@ -8,10 +8,12 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-12-05 20:13:00
+* @updated: 2014-01-21 17:44:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
+
+use Tipui\Builtin\Libs\DataRules as DataRules;
 
 class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 {
@@ -22,11 +24,13 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 	*/
 	public function Exec( $name, $property )
 	{
+
 		/**
-		* name property
+		* Builds the name as array
+		* @see \Builtin\Helpers\HTML\Form::SetNameAsArray()
 		*/
 		$name_add = '';
-		if( self::$name_as_array )
+		if( !empty( self::$name_as_array ) )
 		{
 
 			if( !is_array( self::$name_as_array  ) )
@@ -46,39 +50,29 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 			//print_r( self::$name_as_array); exit;
 			//print_r( $data['key'][self::$name_as_array] ); exit;
 
-			if( isset( $property['value'][self::$name_as_array] ) )
-			{
-				$property['value'] = $property['value'][self::$name_as_array];
-			}
-
 		}
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( $property ); exit;
-		//print_r( $property['key'][self::$name_as_array] ); exit;
-		//print_r( $property['value'] ); exit;
 
         $check = false;
 
-		if( $property['value'] != '' )
+		if( !empty( $property[DataRules::VALUE] ) )
 		{
-			if( !is_array( $property['default'] ) )
+			if( !is_array( $property[DataRules::VALUE] ) )
 			{
-				$check = $property['value'];
+				$check = $property[DataRules::VALUE];
 			}else{
-				$check = array_combine( $property['value'], $property['value'] );
+				//print_r( array_values( $property[DataRules::VALUE] ) ); exit;
+				$check = array_combine( $property[DataRules::VALUE], $property[DataRules::VALUE] );
+				//print_r( $check ); exit;
 			}
 		}else{
-			if( $property['default'] != false )
+			if( isset( $property[DataRules::DEFAULTS] ) and !empty( $property[DataRules::DEFAULTS] ) )
 			{
-				if( !is_array( $property['default'] ) )
+				if( !is_array( $property[DataRules::DEFAULTS] ) )
 				{
-					$check = $property['default'];
+					$check = $property[DataRules::DEFAULTS];
 					settype( $check, 'string' );
 				}else{
-					$check = array_combine( $property['default'], $property['default'] );
+					$check = array_combine( $property[DataRules::DEFAULTS], $property[DataRules::DEFAULTS] );
 				}
 			}
 		}
@@ -86,16 +80,19 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 		/**
 		* Debug purposes
 		*/
-		//print_r( $data['options'] ); exit;
+		//print_r( $data[DataRules::OPTIONS] ); exit;
 
-        foreach( $property['options'] as $k => $v )
+        foreach( $property[DataRules::OPTIONS] as $k => $v )
         {
 
-			$rs[$k] = '<input type="' . $property['type'] . '"' . self::ParametersAdd() . 'name="' . $name . $name_add;
+			$rs[$k] = '<input type="' . $property[DataRules::TYPE] . '"' . self::ParametersAdd() . 'name="' . $name . $name_add;
 
-			if( isset( $property['multiple'] ) )
+			/**
+			* @see \Builtin\Helpers\HTML\Form::SetNameAsArray()
+			*/
+			if( !empty( self::$name_as_array ) )
 			{
-				$rs[$k] .= '[' . $k . ']';
+				$rs[$k] .= '[]';
 			}
 
 			$rs[$k] .= '" value="' . $k . '"';
@@ -115,13 +112,12 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 					$rs[$k] .= ' checked';
 				}else{
 
-					// For mutidimensional array choices
-					if( isset( $property['multiple'] ) )
+					/**
+					* @see \Builtin\Helpers\HTML\Form::SetNameAsArray()
+					*/
+					if( isset( $check[$k] ) )
 					{
-						if( isset( $check[$k] ) )
-						{
-							$rs[$k] .= ' checked';
-						}
+						$rs[$k] .= ' checked';
 					}
 
 				}
@@ -129,7 +125,7 @@ class GroupingOptionProperty extends \Tipui\Builtin\Helpers\HTML\Form
 			}
     
 			/**
-			* class property
+			* class (css stylesheet)
 			*/
 			if( self::$css_name != null )
 			{

@@ -2,12 +2,13 @@
 // 'email':
 $rs = array (
 	'type'           => 'text',
-	'MinLength'      => 6,
-	'MaxLength'      => 130,
+	'min_length'     => 6,
+	'max_length'     => 130,
 	'size'           => 25,
-	'validation'     => 'email',
+	'validation'     => 'Email',
 	'value'          => '',
 	'default'        => '',
-	'pre-filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( array( 'php', 'form', 'script', 'headers', 'trim' ) ) ),					
+	//'pre_filter'     => array( array( '\Tipui\Builtin\Libs\Strings', 'Escape' ), array( array( 'php', 'form', 'script', 'headers', 'trim' ) ) ),
+	'pre_filter'     => 'Email',					
 );
 ?>

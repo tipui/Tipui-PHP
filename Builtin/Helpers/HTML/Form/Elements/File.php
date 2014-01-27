@@ -8,12 +8,10 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-23 02:13:00
+* @updated: 2014-01-05 18:30:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form\Elements;
-
-use Tipui\Builtin\Libs as Libs;
 
 class File extends \Tipui\Builtin\Helpers\HTML\Form
 {
