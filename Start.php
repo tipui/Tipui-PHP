@@ -7,34 +7,12 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-01-24 17:58:00
+* @updated: 2014-02-02 01:48:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
 
-/**
-* [important and insights]
- - interface languages libraries
- - translations for sanitization errors codes
- - Mail lib
- - DB lib
- - Benchmark lib
- - Deny access to Core instance from not allowed scripts.
- - [x]Check if user cookies are enabled. If not enabled or fails, then use session.
- - Cookie data version. Will be useful for cases when cookie or session structures was modified.
- - input file support for name as array
- - Sanitize get data from customized array of parameters, instead of from Request library. (legacy ExternalData)
- - Optionaly defines array of names for SetNameAsArray in model Form() method
- - data rules files as class{}. see: \TipuivBuiltin\Libs\DataRules (this will eliminate the self checking for overriding)
 
- - js, css parser
- - cache of pre-compiled files
-
- - Cache mode options set (Docs/Builtin/Libs/Cache) Cache->Cookie(time, time_mode...)->Set();
- - [optional] Module and Template file with same name of existing folder will search folder/index.php and folder/index.html respectivelly if files not exists in the indicated path.
- - Factory classes: Test instances performance.
- - sys_getloadavg php function implementation
-*/
 
 /**
 * Namespace alias for builtin Libraries
@@ -261,17 +239,35 @@ if( !defined( 'TIPUI_PATH' ) )
 		*/
 
 		/**
+		* Defining the folder name of template files.
+		* The parameter LANGUAGES_IN_FOLDER must be enabled to use this feature.
+		* @see: app/config/env/TEMPLATES
+		*/
+		$lang_code = null;
+
+		if( $env_templates['LANGUAGES_IN_FOLDER'] )
+		{
+
+			if( !$lang_code = $c -> GetMethodDataCache( 'LanguageCodeFromParameters' ) )
+			{
+				$lang_code = ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR;
+			}
+
+		}
+
+		/**
 		* Sets PHP include_path
 		*/
-		$base_path = TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR;
+		$base_path = TIPUI_APP_PATH . $env_templates['FOLDER'] . DIRECTORY_SEPARATOR . $lang_code . $c::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR;
 		set_include_path( $base_path );
+		//echo $base_path; exit;
 
 		/**
 		* Call as instance
 		*/
 		$t = new Libs\Template;
 		$t -> Init( $base_path, $env_templates['TAG'], $env_templates['OUTPUT'] );
-		
+
 		/**
 		* Rendering and dispatching the template
 		*
@@ -280,9 +276,9 @@ if( !defined( 'TIPUI_PATH' ) )
 		$t -> Compile( $m -> View(), ( !isset( $model_cache['Template']['dir'] ) ? false : $model_cache['Template']['dir'] ), ( !isset( $model_cache['Template']['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $model_cache['Template']['file'] ) );
 
 		/**
-		* Clear $model_cache variable.
+		* Clear used variables.
 		*/
-		unset( $base_path, $model_cache, $t );
+		unset( $base_path, $model_cache, $t, $lang_code );
 	}
 
 	/**

@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-01-03 04:09:00
+* @updated: 2014-02-19 16:36:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
@@ -25,7 +25,7 @@ class AddForm extends \Tipui\Builtin\Helpers\HTML\Form
 		!$id     ? $id     = 'frm1' : null;
 		!$name   ? $name   = 'frm1' : null;
 		!$method ? $method = \Tipui\Builtin\Libs\Form::GetMethod() : null;
-		return '<form id="' . $id . '" name="' . $name . '" action="' . $action . '"' . ' method="' . $method . '"' . self::ParametersAdd() . '>';
+		return '<form id="' . $id . '" name="' . $name . '" action="' . $action . '"' . ' method="' . $method . '"' . self::ParametersAdd() . '>' . self::AddLangParam();
 	}
 
 }

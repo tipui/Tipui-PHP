@@ -1,0 +1,28 @@
+/**
+*
+* Update: 2014-02-22-02:54
+*
+* [insights]
+ - http://dev-php.tipui.com//Docs/Builtin/Helpers/HTML/Form/AddForm (urgent)
+ - templates, languages (1 for app and other for builtin stuffs), vendor folders
+ - translations for notices and warning of builtin codes
+ - Mail lib (swift / phpmailer)
+ - DB lib (pdo / builtin)
+ - Benchmark lib
+
+ - Deny access to Core instance from not allowed scripts.
+ - [x]Check if user cookies are enabled. If not enabled or fails, then use session.
+ - Cookie data version. Will be useful for cases when cookie or session structures was modified.
+ - input file support for name as array
+ - Sanitize get data from customized array of parameters, instead of from Request library. (legacy ExternalData)
+ - Optionaly defines array of names for SetNameAsArray in model Form() method
+ - data rules files as class{}. See: \Tipui\Builtin\Libs\DataRules (this will eliminate the self checking for overriding)
+
+ - js, css parser
+ - cache of pre-compiled files
+
+ - Cache mode options set (Docs/Builtin/Libs/Cache) Cache->Cookie(time, time_mode...)->Set();
+ - [optional] Module and Template file with same name of existing folder will search folder/index.php and folder/index.html respectivelly if files not exists in the indicated path.
+ - Factory classes: Test instances performance.
+ - sys_getloadavg php function implementation
+*/

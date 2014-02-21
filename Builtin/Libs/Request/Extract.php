@@ -145,7 +145,7 @@ class Extract extends Libs\Request
 			//var_dump($url_href_base_length); exit;
 			if( $url_href_base_length > 1 )
 			{
-				// if lengh is more than 1, means that app is using subfolder
+				// if length is bigger than 1, means that app is using subfolder
 				self::$request_uri = substr( self::$request_uri, $url_href_base_length );
 			}
 

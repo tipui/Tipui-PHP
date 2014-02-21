@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-01-04 02:36:00
+* @updated: 2014-02-02 00:37:00
 */
 
 namespace Tipui;
@@ -94,6 +94,12 @@ class Core
 	const STORAGE_FOLDER = 'Storage';
 
 	/**
+	* Language folder name
+	* For translations files
+	*/
+	const LANGUAGE_FOLDER = 'Languages';
+
+	/**
 	* Helpers folder name
 	*/
 	const ENV_FOLDER_HELPERS = 'Helpers';
@@ -138,6 +144,11 @@ class Core
 	* Handles the parameters for [code]GetEnv[/code] method called from [code]self::CONF_CALLER[/code].
 	*/
 	private $called_getenv;
+
+	/**
+	* Handles the interface language code.
+	*/
+	private $lang_code;
 
 	/**
 	* Initiates properties
@@ -305,10 +316,11 @@ class Core
 
 	/**
 	* Registered environment settings files
+	* If necessary to use $this -> env[] check the self::LoadSettings(). There are 2 points, one for existing cache and other when is cache files is created.
 	*/
     private function GetRegisteredSettingsFiles()
     {
-		return array( 'BOOTSTRAP', 'PHP', 'URL', 'TIME_ZONE', 'COOKIES', 'MODULES', 'TEMPLATES' );
+		return array( 'BOOTSTRAP', 'PHP', 'URL', 'TIME_ZONE', 'COOKIES',  'LANGUAGES', 'MODULES', 'TEMPLATES' );
 	}
 
 	/**
@@ -362,8 +374,9 @@ class Core
 			/**
 			* Loads URL and MODULES configuration from cache files.
 			*/
-			$this -> env['URL']     = $this -> GetEnv( 'URL' );
-			$this -> env['MODULES'] = $this -> GetEnv( 'MODULES' );
+			$this -> env['URL']       = $this -> GetEnv( 'URL' );
+			$this -> env['MODULES']   = $this -> GetEnv( 'MODULES' );
+			$this -> env['LANGUAGES'] = $this -> GetEnv( 'LANGUAGES' );
 
 			/**
 			* Clear FileSystem instance handler.
@@ -466,9 +479,14 @@ class Core
 		$this -> SetMethodDataCache( 'IsCliMode' );
 
 		/**
-		* Saves data about URL and/or parameters and routing.
+		* Saves data extracted from URL (parameters and routing).
 		*/
 		$this -> SetMethodDataCache( 'Routing' );
+
+		/**
+		* Stores the interface language code.
+		*/
+		$this -> SetMethodDataCache( 'LanguageCodeFromParameters' );
 
 		return null;
 	}
@@ -679,6 +697,10 @@ class Core
 		$this -> request['params'] = $c -> Extract();
 		$this -> request['mode_rewrite'] = $c -> IsModeRewrite();
 
+		/**
+		* Debug purposes
+		*/
+		//echo 'lang_code: ' . $lang_code;
 		//print_r( $this -> request ); exit;
 		//$this -> request['URI'] = urldecode( $c -> Extract() );
 
@@ -687,7 +709,107 @@ class Core
 	}
 
 	/**
+	* Extracts the language code from parameters, if exists.
+	* If found, the code is validated with array of languages defined in app/config/env/LANGUAGES
+	* To read the value: Core::GetConf()->LanguageCodeFromParameters
+	*/
+    private function LanguageCodeFromParameters()
+    {
+
+		if( empty( $this -> lang_code ) )
+		{
+			return false;
+		}
+
+		return $this -> lang_code;
+
+	}
+
+	/**
+	* Extracts the language code from parameters, if exists.
+	* If found, the code is validated with array of languages defined in app/config/env/LANGUAGES
+	*/
+    private function SetLanguageCodeFromParameters()
+    {
+
+		/**
+		* Checking for language code
+		* For URL in mode rewrite, the parameter must be the first 2 characters + / (slash)
+		* For normal URL, must check the parameter name define in config/env/URL
+		* The parameter name: self::GetConf()->URL->PARAM_LANG
+		*/
+
+		$this -> lang_code = null;
+
+		if( is_array( $this -> request['params'] ) and isset( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] ) )
+		{
+
+			/**
+			* For normal requests by GET or POST, not for URL rewrite format.
+			*/
+			//echo $this -> request['params'][$this -> env['URL']['PARAM_LANG']] . PHP_EOL;
+			$this -> lang_code = strtolower( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] );
+
+		}else{
+
+			/**
+			* Probably, came from mode rewrite URL.
+			*
+			* Extracts the language code + slash ( ie: en/ )
+			*/
+			$this -> lang_code = substr( $this -> request['params'], 0, 3 );
+			//echo $this -> lang_code; exit;
+
+			/**
+			* Extracts the last character of extracted data. The target is find the parameters folder separator (slash).
+			*/
+			$slash_check = substr( $this -> lang_code, 2, 1 );
+			//echo $slash_check; exit;
+
+			/**
+			* If parameters folder separator was found or, if found empty character, then, validates as possible language code.
+			*/
+			if( empty( $slash_check ) || $slash_check == $this -> env['URL']['PFS'] )
+			{
+				/**
+				* Formatting the string according to ISO 639-1 for languages codes.
+				*/
+				$this -> lang_code = strtolower( substr( $this -> lang_code, 0, 2 ) );
+			}else{
+				/**
+				* If the expected format is invalid, must assign null value.
+				*/
+				$this -> lang_code = null;
+			}
+
+			/**
+			* Clear used variable
+			*/
+			unset( $slash_check );
+
+		}
+
+		/**
+		* Validating the language code
+		* If not exists, will be ignored and setted to null.
+		* The language code is case insensitive.
+		*/
+		//print_r( $this -> env['LANGUAGES'] ); exit;
+		if( !empty( $this -> lang_code ) && !isset( $this -> env['LANGUAGES'][$this -> lang_code] ) )
+		{
+			$this -> lang_code = null;
+		}
+
+		/**
+		* Debug purposes
+		*/
+		//echo 'lang_code (' . __LINE__ . '): ' . $this -> lang_code; exit;
+
+	}
+
+	/**
 	* Prepare routing
+	* @see: self::SaveToCache()
 	*/
     private function Routing()
     {
@@ -698,28 +820,98 @@ class Core
 		$this -> Request();
 
 		/**
-		* If $this -> request['params'], means that is probably comming from normal URL.
+		* Handles the main parameter value.
+		*/
+		$module_uri = null;
+
+		/**
+		* Handles module class name.
+		*/
+		$clss = null;
+
+		/**
+		* If $this -> request['params'] is array, means that is comming from normal URL.
 		* For this case, must check if $this -> env['URL']['PARAM_NAME'] exists in the array indexes.
 		*/
-		if( is_array( $this -> request['params'] ) and isset( $this -> request['params'][$this -> env['URL']['PARAM_NAME']] ) )
+		if( !$this -> request['mode_rewrite'] )
 		{
-			$module_uri = $this -> request['params'][$this -> env['URL']['PARAM_NAME']];
+
+			if( isset( $this -> request['params'][$this -> env['URL']['PARAM_NAME']] ) )
+			{
+				$module_uri = $this -> request['params'][$this -> env['URL']['PARAM_NAME']];
+			}
+
 		}else{
 			/**
-			* Probably, came from mode rewrite URL.
+			* From mode rewrite URL.
 			*/
 			$module_uri = $this -> request['params'];
 		}
 
-		/**
-		* Compatibility for multibyte strings
-		*/
-		$module_uri = urldecode( $module_uri );
+		//print_r( $this -> request['params'] ); exit;
 
 		/**
-		* Building the class name
+		* Retrieving the language code, if exists.
 		*/
-		$clss = str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $module_uri );
+		//$lang_code = $this -> SetLanguageCodeFromParameters();
+		$this -> SetLanguageCodeFromParameters();
+
+		/**
+		* Checking the language code on main parameter.
+		*/
+		if( !empty( $module_uri ) )
+		{
+
+			/**
+			* Checking the language code on main parameter.
+			*/
+			if( !empty( $this -> lang_code ) )
+			{
+
+				/**
+				* Debug purposes.
+				*/
+				//echo $this -> lang_code; exit;
+
+				/**
+				* For mode rewrite parameter, must remove the part the identifies the language code.
+				*/
+				if( $this -> request['mode_rewrite'] )
+				{
+
+					/**
+					* Removes the first 2 characters that represents the language code.
+					*/
+					$module_uri = substr( $module_uri, 2 );
+
+					/**
+					* Removes the parameter folder separator character, if exists.
+					*/
+					if( substr( $module_uri, 0, 1 ) == $this -> env['URL']['PFS'] )
+					{
+						$module_uri = substr( $module_uri, 1 );
+					}
+
+				}
+
+			}
+
+			/**
+			* Debug purposes
+			*/
+			//print_r( $module_uri ); exit;
+
+			/**
+			* Compatibility for multibyte strings
+			*/
+			$module_uri = urldecode( $module_uri );
+
+			/**
+			* Building the class name
+			*/
+			$clss = str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $module_uri );
+
+		}
 
 
 		/**
