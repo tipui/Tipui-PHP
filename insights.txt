@@ -3,7 +3,6 @@
 * Update: 2014-02-22-02:54
 *
 * [insights]
- - http://dev-php.tipui.com//Docs/Builtin/Helpers/HTML/Form/AddForm (urgent)
  - templates, languages (1 for app and other for builtin stuffs), vendor folders
  - translations for notices and warning of builtin codes
  - Mail lib (swift / phpmailer)
@@ -20,6 +19,8 @@
 
  - js, css parser
  - cache of pre-compiled files
+ - when entering with duplicated slashes, by default, loads not found module, but may be not so strict and remove the duplicated slashes:
+   http://dev-php.tipui.com//Docs
 
  - Cache mode options set (Docs/Builtin/Libs/Cache) Cache->Cookie(time, time_mode...)->Set();
  - [optional] Module and Template file with same name of existing folder will search folder/index.php and folder/index.html respectivelly if files not exists in the indicated path.

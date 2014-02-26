@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-02 00:37:00
+* @updated: 2014-02-27 03:21:00
 */
 
 namespace Tipui;
@@ -969,16 +969,69 @@ class Core
 
 			/**
 			* If model or routing is not found, loads 404 (not found) Module
+			* However, if 404 module not exists, throws exception.
 			*/
 			if( !$rs )
 			{
-				if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
-				{
-					throw new \Exception('404/NotFound Module is invalid or not found. Check MODULES.php in /app/config/env/');
-				}
+				$rs = $this -> LoadnotFoundModule();
 			}
 
 		}
+
+		/**
+		* Debug purposes
+		*/
+		//echo $rs['class'] . PHP_EOL . $this -> env['MODULES']['404']; exit;
+
+
+		/**
+		* Check if the class name is valid.
+		* The occurrency of duplicated slash may cause fatal errors.
+		* If class name is not the default and valid 404 not found module, check the name against the filtered name.
+		*/
+		if( $rs['class'] != $this -> env['MODULES']['404'] )
+		{
+			/**
+			* If DIRECTORY_SEPARATOR is backslash, this prevents conflict with forward slash.
+			*/
+			$cl_name = str_replace( DIRECTORY_SEPARATOR, '/', $rs['class'] );
+
+			/**
+			* Debug purposes
+			*/
+			//echo $cl_name . PHP_EOL;
+			//echo 'replace: ' . preg_replace( '!\/+!', '/', $str ); exit;
+
+			/**
+			* Removing the duplicated occurrences of forward slash, if exists.
+			*/
+			$str = preg_replace( '!\/+!', '/', $cl_name );
+
+			/**
+			* Removing the forward slash from the beginning of string, if exists.
+			* Don't need remove on the end because is removed previously.
+			*/
+			$str = ltrim( $str, '\/$@' );
+			//echo $str; exit;
+
+			/**
+			* Checking the name against the filtered name.
+			* If different, means that the module name contains duplicated slashes.
+			* For this case, the default strict mode will load the 404 not found module.
+			*/
+			if( $cl_name != $str )
+			{
+				$rs = $this -> LoadnotFoundModule();
+			}
+
+			/**
+			* Clear used variables.
+			*/
+			unset( $cl_name, $str );
+
+		}
+
+
 
 		/**
 		* Retrieves method and mode_rewrite parameters from $request property to Routing() output result.
@@ -998,9 +1051,10 @@ class Core
 		//echo PHP_EOL . PHP_EOL; print_r( $rs ); echo PHP_EOL . __FILE__ . exit;
 
 		/**
+		* Debug purposes
 		* Include the module file
 		*/
-		require_once( $rs['path'] );
+		//require_once( $rs['path'] );
 
 		/**
 		* Debug purposes
@@ -1202,6 +1256,21 @@ class Core
 		//exit;
 
 		return ( ( $goal === true ) ? $rs : false );
+
+	}
+
+	/**
+	* Loads the 404 not found module.
+	*/
+	private function LoadnotFoundModule()
+	{
+
+		if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
+		{
+			throw new \Exception('404/NotFound Module is invalid or not found. Check MODULES.php in /app/config/env/');
+		}
+
+		return $rs;
 
 	}
 
