@@ -38,7 +38,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	define( 'TIPUI_PATH', dirname( __FILE__ ) . DIRECTORY_SEPARATOR );
 
 	// public path, where the index.php is located
-	define( 'TIPUI_APP_PUBLIC_PATH', dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR );
+	define( 'TIPUI_APP_PUBLIC_PATH', str_replace( '/', DIRECTORY_SEPARATOR, dirname( $_SERVER['SCRIPT_FILENAME'] ) ) . DIRECTORY_SEPARATOR );
 
 	// PHP scripts files name extension
 	define( 'TIPUI_CORE_ENV_FILE_EXTENSION', '.php' );
@@ -62,7 +62,8 @@ if( !defined( 'TIPUI_PATH' ) )
 		* /public/index.php
 		* /app/ (default recommended location and folder name)
 		*/
-		$app_path = dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR;
+		//$app_path = str_replace( '/', DIRECTORY_SEPARATOR, dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR );
+		$app_path = str_replace( '/', DIRECTORY_SEPARATOR, dirname( dirname( $_SERVER['SCRIPT_FILENAME'] ) ) . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR );
 
 		if( is_dir( $app_path ) )
 		{

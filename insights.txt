@@ -1,14 +1,16 @@
 /**
 *
-* Update: 2014-02-22-02:54
+* Update: 2014-02-28 19:23
 *
 * [insights]
- - templates, languages (1 for app and other for builtin stuffs), vendor folders
- - translations for notices and warning of builtin codes
+ - metatag language name
+ - vendors (hashids, alphaid, phpmailer, swiftmailer)
  - Mail lib (swift / phpmailer)
  - DB lib (pdo / builtin)
  - Benchmark lib
 
+ - LANGUAGES_IN_FOLDER
+ - translations for notices and warning of builtin codes
  - Deny access to Core instance from not allowed scripts.
  - [x]Check if user cookies are enabled. If not enabled or fails, then use session.
  - Cookie data version. Will be useful for cases when cookie or session structures was modified.

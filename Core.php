@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-27 03:21:00
+* @updated: 2014-02-28 00:08:00
 */
 
 namespace Tipui;
@@ -57,6 +57,11 @@ class Core
 	* Handle methods results.
 	*/
 	private $core_methods_cached_data;
+
+	/**
+	* Builtin language code
+	*/
+	const BUILTIN_LANG_CODE = 'en';
 
 	/**
 	* Builtin folder name
@@ -973,7 +978,7 @@ class Core
 			*/
 			if( !$rs )
 			{
-				$rs = $this -> LoadnotFoundModule();
+				$rs = $this -> LoadNotFoundModule();
 			}
 
 		}
@@ -1021,7 +1026,7 @@ class Core
 			*/
 			if( $cl_name != $str )
 			{
-				$rs = $this -> LoadnotFoundModule();
+				$rs = $this -> LoadNotFoundModule();
 			}
 
 			/**
@@ -1262,7 +1267,7 @@ class Core
 	/**
 	* Loads the 404 not found module.
 	*/
-	private function LoadnotFoundModule()
+	private function LoadNotFoundModule()
 	{
 
 		if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )

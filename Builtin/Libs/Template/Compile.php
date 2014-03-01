@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-10-04 19:13:00
+* @updated: 2014-02-28 19:32:00
 */
 
 namespace Tipui\Builtin\Libs\Template;
@@ -47,48 +47,21 @@ class Compile extends Libs\Template
         }
 
 		//echo PHP_EOL . ': ' . self::$path . $file; //exit;
-        if( $fp = @fopen( self::$path . $file, 'r' ) )
-        {
-
-            $src = '';
-            while( !feof( $fp ) )
-            {
-                $src .= fread( $fp, 65536 );
-				// Essential for large files
-				if( self::$output == 'print' )
-				{
-					flush();
-				}
-            }  
-            fclose( $fp ); 
-
-            ob_start();
-
-            eval( '?>' . $src );
-            $__r = ob_get_contents();
-			//ob_end_flush();
-            ob_end_clean(); 
-            unset( $src );
-
-			if( self::$output == 'print' )
-			{
-				flush();
-			}
-
-        }else{
-            $__r = '[' . get_class() . '], ERROR: FILE NOT EXISTS -> ' . self::$path . $file;
-        }
-		unset( $fp );
+		ob_start();
+		require_once( self::$path . $file );
+		$__r = ob_get_contents();
+		ob_end_clean();
 
         if( self::$output == 'print' )
         {
-            echo $__r;
-            unset( $__r );
-            return null;
-        }
+			echo $__r;
+			unset( $__r );
+			return null;
+		}
 
-        self::$output = 'print';
-        return $__r;
+		self::$output = 'print';
+
+		return $__r;
 
     }
 
