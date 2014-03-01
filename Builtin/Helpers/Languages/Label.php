@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-01 01:58:00
+* @updated: 2014-03-02 04:38:00
 */
 
 namespace Tipui\Builtin\Helpers\Languages;
@@ -79,7 +79,7 @@ class Label extends \Tipui\Builtin\Helpers\Languages
 		/**
 		* Loading the labels
 		*/
-		if( !isset( self::$labels[$idx_base] ) )
+		if( !isset( self::$labels[self::$lang_code][$idx_base] ) )
 		{
 
 			if( empty( self::$base_path ) )
@@ -93,7 +93,7 @@ class Label extends \Tipui\Builtin\Helpers\Languages
 			/**
 			* Loading the array of labels
 			*/
-			self::$labels[$idx_base] = array( 'source' => self::$file_path, 'data' => require_once( self::$file_path ) );
+			self::$labels[self::$lang_code][$idx_base] = array( 'source' => self::$file_path, 'data' => require_once( self::$file_path ) );
 
 			/**
 			* Must set to null to avoid conflict when loading labels from different paths in the same script.
@@ -113,7 +113,7 @@ class Label extends \Tipui\Builtin\Helpers\Languages
 		}
 		*/
 
-		return ( !empty( $idx ) && isset( self::$labels[$idx_base]['data'][$idx] ) ) ? self::$labels[$idx_base]['data'][$idx] : '[NULL]';
+		return ( !empty( $idx ) && isset( self::$labels[self::$lang_code][$idx_base]['data'][$idx] ) ) ? self::$labels[self::$lang_code][$idx_base]['data'][$idx] : '[NULL]';
 
 	}
 
