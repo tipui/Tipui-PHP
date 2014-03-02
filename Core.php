@@ -676,30 +676,50 @@ class Core
 		//var_dump( $this -> IsCliMode() ); exit;
 
 		/**
-		* URL samples:
-		* /?p=Foo/Bar&id=2
-		* /?p=Foo/Bar/2
+		* [URL samples]
 		*
-		* CMD samples:
-		* > C:\php\php5.3.26ts\php.exe E:\_w\vhosts\dev-php.tipui.com\public\index.php -p p=Foo/Bar%26id=2
+		* Normal mode
+		* /?p=Foo/Bar&id=2
+		*
+		* URL Rewrite mode:
+		* /Foo/Bar/2
+		*
+		* Command Line Interface (CLI)
+		* > C:\php\5.3.5-ts\php.exe C:\_w\vhosts\dev-php.tipui.com\public\index.php
 		* > C:\php\php5.3.26ts\php.exe E:\_w\vhosts\dev-php.tipui.com\public\index.php -p Foo/Bar/2
 		*/
 
+		/**
+		* Creates new instance for Request Library and set it to defaults
+		*/
 		$c = new Builtin\Libs\Request;
 		$c -> SetDefaults();
-		//$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] ); [deprecated]
+
+		/**
+		* Necessary to enable getopt() functionality (CLI mode)
+		*/
+		$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
+
+		/**
+		* Set the mode that is running the current script
+		*/
 		$c -> SetSapiMode( $this -> sapi_is_cli );
+
+		/**
+		* Set the URL basic parts
+		*/
 		$c -> SetURLParts( $this -> env['URL']['HREF_BASE'] );
+
 		/**
 		* Debug purposes
 		*/
+		//var_dump( $this -> sapi_is_cli ); exit;
 		//echo time(); exit;
 		//echo $c -> GetMethod(); exit;
 		//print_r( $c -> Extract() ); exit;
 
 		/**
-		* Applying urldecode() to support multibyte strings from URL
-		* example http://localhost/ダミー
+		* Retrieving the results
 		*/
 		$this -> request['method'] = $c -> GetMethod();
 		$this -> request['params'] = $c -> Extract();
@@ -719,7 +739,7 @@ class Core
 	/**
 	* Extracts the language code from parameters, if exists.
 	* If found, the code is validated with array of languages defined in app/config/env/LANGUAGES
-	* To read the value: Core::GetConf()->LanguageCodeFromParameters
+	* To read the value: [/code]\Tipui\Core::GetConf()->GetMethodDataCache('LanguageCodeFromParameters')[/code]
 	*/
     private function LanguageCodeFromParameters()
     {
@@ -749,14 +769,17 @@ class Core
 
 		$this -> lang_code = null;
 
-		if( is_array( $this -> request['params'] ) and isset( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] ) )
+		if( is_array( $this -> request['params'] ) )
 		{
 
-			/**
-			* For normal requests by GET or POST, not for URL rewrite format.
-			*/
-			//echo $this -> request['params'][$this -> env['URL']['PARAM_LANG']] . PHP_EOL;
-			$this -> lang_code = strtolower( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] );
+			if( isset( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] ) )
+			{
+				/**
+				* For normal requests by GET or POST, not for URL rewrite format.
+				*/
+				//echo $this -> request['params'][$this -> env['URL']['PARAM_LANG']] . PHP_EOL;
+				$this -> lang_code = strtolower( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] );
+			}
 
 		}else{
 

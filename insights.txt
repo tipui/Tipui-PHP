@@ -7,7 +7,6 @@
  - Mail lib (swift / phpmailer)
  - DB lib (pdo / builtin)
  - Benchmark lib
- - CLI mode
 
  - LANGUAGES_IN_FOLDER
  - translations for notices and warning of builtin codes
