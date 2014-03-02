@@ -236,20 +236,27 @@ class Make
 		//echo $this -> data['b'] . 'aaaa'; //exit;
 
 		/**
+		* If size of arrays doesn't match, then, returns the env HREF_BASE
+		* [deprecated]
+		*/
+		/*
+        if( count( $this -> data['k'] ) <> count( $this -> data['v'] ) )
+        {
+			//print_r( $this -> data ); exit;
+			return $this -> data['b'];
+            //return null;
+        }
+		*/
+
+		/**
 		* URL arguments (parameters)
 		* k represents parameters names
 		* v represents respective values of parameters
 		* both must have same size.
 		*
 		* If Parameters and Values are empty, ie: HTML\URL::Make() -> Parameters() -> Values();
-		* or, if size of arrays doesn't match, then, returns the env HREF_BASE
 		*/
-        if( count( $this -> data['k'] ) <> count( $this -> data['v'] ) )
-        {
-			return $this -> data['b'];
-            //return null;
-        }
-
+		
         switch( $this -> data['t'] )
         {
             default:
@@ -262,17 +269,36 @@ class Make
 					foreach( $this -> data['k'] as $k => $v )
 					{
 
-						settype( $this -> data['v'][$k], 'string' ); // prevent 0 value as boolean, null or empty
+						/**
+						* Check if index of array of values exists.
+						*/
+						if( isset( $this -> data['v'][$k] ) )
+						{
 
-						if( $k > 0 )
-						{
-							$r .= $this -> env_url['PARAM_SEPARATOR'];
+							/**
+							* Prevent 0 value as boolean, null or empty.
+							*/
+							settype( $this -> data['v'][$k], 'string' );
+
+							/**
+							* Concatenate the parameter separator after the first index.
+							*/
+							if( $k > 0 )
+							{
+								$r .= $this -> env_url['PARAM_SEPARATOR'];
+							}
+
+							/**
+							* Mounting only if key value is not empty.
+							*/
+							if( !empty( $v ) )
+							{
+								$r .= $v . '=';
+								$r .= $this -> data['v'][$k];
+							}
+
 						}
-						if( !empty( $v ) )
-						{
-							$r .= $v . '=';
-						}
-						$r .= $this -> data['v'][$k];
+
 					}
 				}
 				if( ini_get( 'session.use_trans_sid' ) == 1 )
