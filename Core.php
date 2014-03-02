@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-28 00:08:00
+* @updated: 2014-03-02 19:27:00
 */
 
 namespace Tipui;
@@ -610,10 +610,13 @@ class Core
 					/**
 					* Returns index and subindex value
 					*/
-					return $this -> core_cached_data[$index][$subindex];
+					if( isset( $this -> core_cached_data[$index][$subindex] ) )
+					{
+						return $this -> core_cached_data[$index][$subindex];
+					}
 				}
 
-				return null;
+				return false;
 			}
 
 			/**

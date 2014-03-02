@@ -3,8 +3,6 @@
 * Update: 2014-02-28 19:23
 *
 * [insights]
- -http://dev-php.tipui.com/pt/Docs/Builtin/Helpers/HTML/Form/AddForm
- - metatag language name
  - vendors (hashids, alphaid, phpmailer, swiftmailer)
  - Mail lib (swift / phpmailer)
  - DB lib (pdo / builtin)
