@@ -7,7 +7,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-02 01:48:00
+* @updated: 2014-03-03 19:28:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
@@ -61,9 +61,16 @@ if( !defined( 'TIPUI_PATH' ) )
 		* Example: 
 		* /public/index.php
 		* /app/ (default recommended location and folder name)
+		* The [code]realpath()[/code] function is used to canonicalize the path instead of using [code]str_replace()[/code] to convert the slashes.
+		* The app folder, by default, must be 1 folder above the public folder.
+		* See examples for other cases:
+		* case 1. The app folder below the public folder: app/../public/app
+		* case 2. The app folder, 2 folders above the public folder: ../app
+		* case 3. The app folder, 1 folder above the public folder, but inside other folder: ../other/app
 		*/
 		//$app_path = str_replace( '/', DIRECTORY_SEPARATOR, dirname( $_SERVER['SCRIPT_FILENAME'] ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR );
-		$app_path = str_replace( '/', DIRECTORY_SEPARATOR, dirname( dirname( $_SERVER['SCRIPT_FILENAME'] ) ) . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR );
+		//$app_path = str_replace( '/', DIRECTORY_SEPARATOR, dirname( dirname( $_SERVER['SCRIPT_FILENAME'] ) ) . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME . DIRECTORY_SEPARATOR );
+		$app_path = realpath( dirname( dirname( $_SERVER['SCRIPT_FILENAME'] ) ) . DIRECTORY_SEPARATOR . TIPUI_APP_FOLDER_NAME ) . DIRECTORY_SEPARATOR;
 
 		if( is_dir( $app_path ) )
 		{

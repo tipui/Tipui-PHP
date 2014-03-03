@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-02 19:27:00
+* @updated: 2014-03-03 19:28:00
 */
 
 namespace Tipui;
@@ -103,6 +103,12 @@ class Core
 	* For translations files
 	*/
 	const LANGUAGE_FOLDER = 'Languages';
+
+	/**
+	* Vendor folder name
+	* For third party libraries
+	*/
+	const VENDORS_FOLDER = 'Vendors';
 
 	/**
 	* Helpers folder name

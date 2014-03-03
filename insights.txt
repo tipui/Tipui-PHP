@@ -1,6 +1,6 @@
 /**
 *
-* Update: 2014-02-28 19:23
+* Update: 2014-03-03 19:28:00
 *
 * [insights]
  - vendors (hashids, alphaid, phpmailer, swiftmailer)
@@ -9,6 +9,7 @@
  - Benchmark lib
 
  - LANGUAGES_IN_FOLDER
+ - review using realpath() to canonicalize the paths on everything that is using str_replace() for slashes compatibility
  - translations for notices and warning of builtin codes
  - Deny access to Core instance from not allowed scripts.
  - [x]Check if user cookies are enabled. If not enabled or fails, then use session.

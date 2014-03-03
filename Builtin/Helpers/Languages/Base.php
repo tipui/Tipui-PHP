@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-28 00:37:00
+* @updated: 2014-03-03 19:28:00
 */
 
 namespace Tipui\Builtin\Helpers\Languages;
@@ -37,19 +37,15 @@ class Base extends \Tipui\Builtin\Helpers\Languages
 			self::Lang();
 		}
 
-		if( empty( $base_path ) )
-		{
-			/**
-			* Calling backtrace to get the class name that is invoking the label
-			*/
-			$bt = debug_backtrace();
-			$base_path = $bt[3]['file'];
-			/**
-			* Debug purposes
-			*/
-			//print_r( $bt ); exit;
-		}
+		/**
+		* Calling backtrace to get the class name that is invoking the label
+		*/
+		$bt = debug_backtrace();
 
+		/**
+		* Debug purposes
+		*/
+		//print_r( $bt ); exit;
 		//echo TIPUI_PATH . PHP_EOL;
 		//echo TIPUI_APP_PATH . PHP_EOL;
 		//echo TIPUI_APP_PUBLIC_PATH . PHP_EOL;
@@ -58,26 +54,75 @@ class Base extends \Tipui\Builtin\Helpers\Languages
 		//echo strpos( $base_path, TIPUI_APP_PATH );
 		//echo strpos( $base_path, TIPUI_PATH );
 		//exit;
+
+		//$file_path = $bt[3]['file'];
+
+		if( empty( $base_path ) )
+		{
+
+			if( $file_extension = pathinfo( $bt[3]['file'], PATHINFO_EXTENSION ) )
+			{
+				$base_path = substr( $bt[3]['file'], 0, -( strlen( $file_extension ) + 1 ) );
+			}else{
+				$base_path = $bt[3]['file'];
+			}
+
+		}else{
+			//$base_path = dirname( $bt[3]['file'] );
+		}
+
 		/**
-		* Checking if is calling from builtin path
+		* Changing to base dir os current file that is calling this instance
+		* This is needed when [code]$base_path[/code] is relative
 		*/
-		$pos = strpos( $base_path, TIPUI_PATH );
+		chdir( dirname( $bt[3]['file'] ) );
 
 		/**
 		* Debug purposes
+		* http://stackoverflow.com/questions/4049856/replace-phps-realpath/4050444#4050444
+		* http://www.php.net/manual/en/function.realpath.php
 		*/
-		//echo gettype($pos);
+		//echo $bt[3]['file'] . PHP_EOL;
+		//echo $base_path . PHP_EOL;
+		//echo 'Base(): ' . realpath( $base_path ) . PHP_EOL . PHP_EOL; //exit;
+
+		/**
+		* The [code]$base_path[/code] must be absolute, in order to work.
+		*/
+		self::$base_path = realpath( $base_path );
 
 		/**
 		* Mounting the path base
 		*/
+		/*
 		if( $file_extension = pathinfo( $base_path, PATHINFO_EXTENSION ) )
 		{
 			self::$base_path = substr( $base_path, 0, -( strlen( $file_extension ) + 1 ) );
 		}else{
 			self::$base_path = $base_path;
 		}
+		*/
 		//echo 'vv: ' . $base_path . PHP_EOL;
+
+		/**
+		* Canonicalizing the path
+		*/
+		//chdir( self::$base_path );
+		//echo self::$base_path . PHP_EOL . realpath($base_path) . PHP_EOL . PHP_EOL; //exit;
+
+		/**
+		* Checking if is calling from builtin path
+		*/
+		$pos = strpos( self::$base_path, TIPUI_PATH );
+		if( $pos === (int)0 )
+		{
+			
+		}
+
+		/**
+		* Debug purposes
+		*/
+		//echo gettype($pos);
 
 		/**
 		* Validating the return of strpos()
