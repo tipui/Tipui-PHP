@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-03 19:28:00
+* @updated: 2014-03-24 21:19:00
 */
 
 namespace Tipui;
@@ -17,6 +17,23 @@ use \Tipui\Builtin\Libs as Libs;
 
 class Core
 {
+
+	/**
+	* Flag for [code]self::$context[/code] calling 
+	*
+	* @see self::$context_holder
+	* @see self::__get()
+	* @see self::ContextSet()
+	*/
+	protected static $called_context = null;
+
+	/**
+	* Handles the context that provides access to objects in the current state.
+	* @see self::$called_context
+	* @see self::__get()
+	* @see self::ContextSet()
+	*/
+	protected static $context_holder = null;
 
 	/**
 	* Handles the environment settings
@@ -261,19 +278,20 @@ class Core
 	* Undeclared property can be called without cause PHP fatal errors.
 	* This allow us to do some "tricks", like PHP fluent access.
 	*/
-	public function __get($key)
+	public function __get( $key )
 	{
 		/**
 		* Debug purposes
 		*/
 		//echo __NAMESPACE__ ; exit;
-		//echo $this -> called_from . '->' . $key; exit;
+		//echo $this -> called_from . '->' . $key  . PHP_EOL; // exit;
 
 		/**
 		* Execute only if is called from static "alias" method [code]self::CONF_CALLER[/code].
 		*/
 		if( $this -> called_from == self::CONF_CALLER )
 		{
+
 			/**
 			* Debug purposes
 			*/
@@ -296,6 +314,56 @@ class Core
 				*/
 				return $this -> GetEnv( $this -> called_getenv[0], ( isset( $this -> called_getenv[1] ) ? $key : false ) );
 			}
+
+		}else if( !empty( self::$called_context ) ){
+
+			/**
+			* Debug purposes
+			*/
+			//echo PHP_EOL . __FILE__ . PHP_EOL;
+			//var_dump( self::$called_context ); echo PHP_EOL;
+			//echo 'bb: ' . $this -> called_from . ' :->' . $key; //exit;
+			//echo PHP_EOL . 'array: '; print_r( self::$context_holder ); exit;
+			//self::$context_holder['foo'] = 'bar2';
+
+			/**
+			* Checking if requested index exists into [code]$context_holder[/code]
+			*/
+			if( property_exists( self::$context_holder, $key ) )
+			{
+				return self::$context_holder -> {$key};
+			}else{
+				/**
+				* Dispatching fatal error
+				*/
+				throw new \Exception('Core context index "' . $index . '" was not found.');
+			}
+
+		}else if( $key == 'context' ){
+
+			/**
+			* Debug purposes
+			*/
+			//echo time() . PHP_EOL;
+			//print_r( self::$context_holder ); echo PHP_EOL;
+
+			/**
+			* Sets the flag identifying that [code]$context[/code] was called. 
+			*/
+			self::$called_context = $key;
+
+			/**
+			* Debug purposes
+			*/
+			//self::ContextSet( 'foo', 'bar' );
+			//$trace = debug_backtrace();
+			//print_r( $trace ); exit;
+
+			/**
+			* Returning self static object
+			*/
+			return new self();
+
 		}
 
 	}
@@ -322,7 +390,7 @@ class Core
 	*/
 	public static function GetConf()
 	{
-		return new Core;
+		return new self(); // new Core()
 	}
 
 	/**
@@ -332,6 +400,49 @@ class Core
     private function GetRegisteredSettingsFiles()
     {
 		return array( 'BOOTSTRAP', 'PHP', 'URL', 'TIME_ZONE', 'COOKIES',  'LANGUAGES', 'MODULES', 'TEMPLATES' );
+	}
+
+	/**
+	* Sets objects for current context.
+	*
+	* Example for setting:
+	* self::ContextSet( 'form_data_error', 'error_code_test' );
+	*
+	* Example for getting:
+	* \Tipui\Core -> context -> form_data_error;
+	* displays: error_code_test
+	*
+	* @see self::__get()
+	* @see self::$called_context
+	*/
+	public static function ContextSet( $key, $value )
+	{
+
+		/**
+		* If empty, must created anonymous stdClass.
+		*/
+		if( empty( self::$context_holder ) )
+		{
+			self::$context_holder = (object) array(); // new stdClass();
+		}
+
+		/**
+		* Assigning new or replacing existing property.
+		*/
+		if( is_array( $value ) )
+		{
+
+			foreach( $value as $k => $v )
+			{
+				self::$context_holder -> {$key} -> {$k} = $v;
+			}
+
+		}else{
+
+			self::$context_holder -> {$key} = $value;
+
+		}
+
 	}
 
 	/**
@@ -703,8 +814,12 @@ class Core
 
 		/**
 		* Necessary to enable getopt() functionality (CLI mode)
+		* If not in CLI mode, calling the [code]$c -> SetParameter[/code] may conflicts with POST method.
 		*/
-		$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
+		if( $this -> sapi_is_cli )
+		{
+			$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
+		}
 
 		/**
 		* Set the mode that is running the current script
@@ -846,7 +961,7 @@ class Core
 
 	/**
 	* Prepare routing
-	* @see: self::SaveToCache()
+	* @see self::SaveToCache()
 	*/
     private function Routing()
     {
@@ -1115,7 +1230,7 @@ class Core
 
 		/**
 		* Folders levels limit
-		* @see: Docs/Core/GetConf/URL
+		* @see Docs/Core/GetConf/URL
 		*/
 		$i           = $this -> env['URL']['FOLDER_LEVELS'];
 
@@ -1254,7 +1369,7 @@ class Core
 
 			/**
 			* Decrementing the folders level limit
-			* @see: Docs/Core/GetConf/URL
+			* @see Docs/Core/GetConf/URL
 			*/
 			$i--;
 
@@ -1299,7 +1414,7 @@ class Core
 	/**
 	* Loads the 404 not found module.
 	*/
-	private function LoadNotFoundModule()
+	public function LoadNotFoundModule()
 	{
 
 		if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
@@ -1308,6 +1423,33 @@ class Core
 		}
 
 		return $rs;
+
+	}
+
+	/**
+	* Changes the module to load.
+	*/
+	public function ChangeModuleAndLoad( $from_module, $to_module )
+	{
+
+		/**
+		* Must keep the request method from original request.
+		*/
+		$to_module['method']       = $from_module['method'];
+		$to_module['mode_rewrite'] = $from_module['mode_rewrite'];
+
+		/**
+		* Saving the information of the module that was previously loaded.
+		*/
+		$to_module['changed_from'] = $from_module;
+
+		/**
+		* Loading Model Class.
+		*/
+		$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\\' . self::APP_FOLDER_MODEL . '\\' . $to_module['class'];
+		//$m = new $clss;
+
+		return array( 'module_info' => $to_module, 'module_object' => new $clss );
 
 	}
 

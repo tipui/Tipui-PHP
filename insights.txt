@@ -1,12 +1,28 @@
 /**
 *
-* Update: 2014-03-03 19:28:00
+* Update: 2014-03-24 21:19:00
 *
 * [insights]
+ - Implementation of context for Core.
+   documentation
+ - http://dev-php.tipui.com/Docs/Builtin/Helpers/HTML/Form/SetNameAsArray (the post method)
+ - Form::SetElement(), Form::SetURLParam() inside array wose index is the method defined in Form::SetMethod() or the defaults.
  - vendors (hashids, alphaid, phpmailer, swiftmailer)
  - Mail lib (swift / phpmailer)
  - DB lib (pdo / builtin)
  - Benchmark lib
+ - canonical
+	<link rel="canonical" href="http://alexcican.com/post/single-post">
+	http://www.wordtracker.com/academy/seo-clean-urls
+	anchor # ?
+
+ - solution for display 404 or error page.
+	ie: http://dev-php.tipui.com/pt/Docs/aaaa is not valid, but displays the contents of http://dev-php.tipui.com/pt/Docs
+	One solution under current structure is checking is the found page is expecting parameters. If not, may display 404.
+	Other solution is to have registered paths as the previous version, but implicates more limitations.
+	[IMPORTANT]
+	In some cases, the URL expecting parameters but received parameters in a not expected METHOD (GET, POST)
+	Need to check from witch method the parameters came.
 
  - LANGUAGES_IN_FOLDER
  - review using realpath() to canonicalize the paths on everything that is using str_replace() for slashes compatibility

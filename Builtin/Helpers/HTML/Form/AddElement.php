@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-01-05 18:30:00
+* @updated: 2014-03-20 19:30:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Form;
@@ -27,6 +27,7 @@ class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
 	*/
 	public function Exec( $name )
 	{
+
 		/**
 		* Debug purposes
 		*/
@@ -37,22 +38,6 @@ class AddElement extends \Tipui\Builtin\Helpers\HTML\Form
 		*/
         if( is_array( self::$parameter[DataRules::TYPE] ) )
         {
-			// [review]
-			/*
-            foreach( self::$parameter['type'] as $k => $type )
-            {
-                $arr['type']        = $type;
-                $arr['size']        = self::$parameter['size'][$k];
-                $arr['max_length']  = self::$parameter['max_length'][$k];
-                $arr['min_length']  = self::$parameter['min_length'][$k];
-                $arr['value']       = self::$parameter['value'][$k];
-                $arr['default']     = self::$parameter['default'][$k];
-                $arr['options']     = self::$parameter['options'][$k];
-                $arr['validation']  = self::$parameter['validation'];
-                $rs[] = self::AddEntitie( $name . '[' . self::$parameter['names'][$k] . ']', $arr );
-				unset($arr);
-            }
-			*/
 
             foreach( self::$parameter[DataRules::TYPE] as $k => $v )
             {

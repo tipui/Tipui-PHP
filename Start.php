@@ -7,7 +7,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-03 19:28:00
+* @updated: 2014-03-24 21:19:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
@@ -146,6 +146,12 @@ if( !defined( 'TIPUI_PATH' ) )
 	$module = $c -> GetMethodDataCache( 'Routing' );
 
 	/**
+	* Flag for "module change".
+	* Example, if want to load different module from what as requested, regardless if is found or not.
+	*/
+	$module['changed_from'] = null;
+
+	/**
 	* Debug purposes
 	* Displays module or routing (alias) settings.
 	*/
@@ -154,28 +160,126 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Loading Model Class
 	*/
-	$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\Model\\' . $module['class'];
+	$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\\' . $c::APP_FOLDER_MODEL . '\\' . $module['class'];
+	$module['class_namespace'] = $clss;
 	$m = new $clss;
 
+	/**
+	* Clear used variable
+	*/
 	unset( $clss );
+
+	/**
+	* Handles the HTTP Status code generaly for exceptions or errors events.
+	* @see [code]$model_cache['Header']['http_status'][/code]
+	*/
+	$http_status_code = null;
+
+	/**
+	* Debug purposes
+	*/
+	//$c::ContextSet( 'foo', 'bar' );
+	//print_r( $c -> context ); exit;
+	//echo 'start: '; print_r( $c -> context -> foo ); exit;
 
 	/**
 	* Call module Form method, if exists
 	*/
 	if( method_exists( $m, 'Form' ) )
 	{
-		$m -> form = $m -> Form();
-		
+
+		//$m -> form = $m -> Form();
+		$m -> Form();
+
 		/**
 		* Sanitizing parameters (get, post, etc)
 		*/
-		Libs\DataValidation::Sanitize();
+		$m -> form_data = Libs\DataValidation::Sanitize();
+
+		/**
+		* Checking if method have error.
+		*/
+		//echo __FILE__ . PHP_EOL;
+		if( $m -> form_data['method_error'] )
+		{
+
+			/**
+			* Request method is not what the module was expecting.
+			*/
+			$http_status_code = 405;
+
+			/**
+			* Debug purposes
+			*/
+			//echo 'form_data:method_error'; exit;
+
+		}else if( $m -> form_data['error'] ){
+
+			/**
+			* Errors was found on parameters.
+			*/
+			$http_status_code = 400;
+
+			/**
+			* Debug purposes
+			*/
+			//echo 'form_data:error'; exit;
+
+		}
+
+		/**
+		* Holding the context for resturned results from Model::Form() method
+		*/
+		$c::ContextSet( $module['class_namespace'], array( 'form_data' => $m -> form_data ) );
 
 		/**
 		* Debug purposes
 		*/
-		//$m -> parameters = Libs\DataValidation::Sanitize();
-		//print_r( $m -> parameters ); exit;
+		//print_r( $c -> context -> {$module['class_namespace']} -> form_data ); exit;
+		//var_dump( $m -> form_data ); exit;
+		//print_r( $m -> form_data ); exit;
+		//echo current( $module['params'] ) . PHP_EOL;
+		//print_r( $module ); exit;
+
+	}else{
+
+		/**
+		* Debug purposes
+		*/
+		//print_r( $module ); exit;
+
+		/**
+		* The requested module is not expecting parameters.
+		* If receiving parameters, probably, is an wrong URL
+		* By default, must result in 404 "not found page".
+		*/
+		if( isset( $module['params'] ) && is_array( $module['params'] ) && current( $module['params'] ) !== false )
+		{
+
+			/**
+			* Changing to module "not found".
+			* ie: http://dev-php.tipui.com/pt/Docs/aaaa is a invalid page, but displays valid page http://dev-php.tipui.com/pt/Docs
+			* To avoid SEO duplicated URL for same content, must return error or 404 HTTP status.
+			*/
+			$module_change = $c -> ChangeModuleAndLoad( $module, $c -> LoadNotFoundModule() );
+
+			/**
+			* The information of new target module.
+			*/
+			$module = $module_change['module_info'];
+
+			/**
+			* The instance of module loaded.
+			*/
+			$m      = $module_change['module_object'];
+
+			/**
+			* Clear used variable.
+			*/
+			unset( $module_change );
+
+		}
+
 	}
 
 	/**
@@ -185,20 +289,39 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* Handles data for model cache
+	* [review]
+	* original was (2014-03-24 19:57):
+	* $model_cache = $module['changed_from'];
 	*/
-	$model_cache = null;
+	$model_cache = isset( $module['changed_from'] ) ? $module['changed_from'] : array();
 
 	/**
 	* Module/Model class name
 	*/
-	$model_cache['name'] = $module['class'];
+	$model_cache['name'] = !isset( $module['change']['class'] ) ? $module['class'] : $module['change']['class'];
 
 	/**
 	* Retrieving Model Header method, if exists
 	*/
 	if( method_exists( $m, 'Header' ) )
 	{
+
 		$model_cache['Header'] = $m -> Header();
+
+	}else{
+
+		if( !empty( $http_status_code ) )
+		{
+			$model_cache['Header']['http_status'] = $http_status_code;
+		}
+
+	}
+
+	/**
+	* Dispatching the HTTP Status, if defined on model or if [code]$http_status_code[/code] is not empty
+	*/
+	if( isset( $model_cache['Header']['http_status'] ) )
+	{
 
 		/**
 		* Output's custom header HTTP Status
@@ -208,13 +331,14 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* Retrieving template settings overriding, if exists
+	* The Template method inside Model class have precedence, regardless of overridings caused by warnings or errors from Module.
 	*/
 	if( method_exists( $m, 'Template' ) )
 	{
 		$model_cache['Template'] = $m -> Template();
 
 		/**
-		* Output's header content-type and charset and content-type
+		* Outputs the header content-type and charset
 		*/
 		Libs\Header::ContentType( 
 				( !isset( $model_cache['Template']['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache['Template']['content_type'] ),
@@ -226,10 +350,21 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* Creates new instance of Cache library.
+	* [review]
+	* Mark as deprecated for use context or keep both?
+	* $c::ContextSet( $module['class_namespace'], array( 'model_cache' => $model_cache ) );
 	*/
 	Libs\Cache::Set( array( $c::MODEL_CACHE_SESSION_NAME => Libs\Encryption::Auto() -> Encode( $model_cache ) ) );
 
+	/**
+	* Stores the [code]$model_cache[/code] to context.
+	*/
+	$c::ContextSet( $module['class_namespace'], array( 'model_cache' => $model_cache ) );
 
+	/**
+	* Debug purposes
+	*/
+	//print_r( $c -> context -> {$module['class_namespace']} -> model_cache ); exit;
 
 	/**
 	* Rendering template if exists View() method
@@ -250,6 +385,7 @@ if( !defined( 'TIPUI_PATH' ) )
 		* Defining the folder name of template files.
 		* The parameter LANGUAGES_IN_FOLDER must be enabled to use this feature.
 		* @see: app/config/env/TEMPLATES
+		* [review]
 		*/
 		$lang_code = null;
 
@@ -286,14 +422,14 @@ if( !defined( 'TIPUI_PATH' ) )
 		/**
 		* Clear used variables.
 		*/
-		unset( $base_path, $model_cache, $t, $lang_code );
+		unset( $base_path, $t, $lang_code );
+
 	}
 
 	/**
 	* Clear the variables and Core instance.
 	*/
-	unset( $c, $module, $m, $env_bootstrap, $env_templates );
-
+	unset( $c, $module, $m, $env_bootstrap, $env_templates, $model_cache );
 
 	/**
 	* Benchmark debugging
@@ -305,4 +441,5 @@ if( !defined( 'TIPUI_PATH' ) )
 	* Apache Benchmark
 	* > C:\Apache\httpd-2.2.25-win32-x86-openssl-0.9.8y\bin>ab -n 1000 -c 5 http://dev-php.tipui.com/
 	*/
+
 }

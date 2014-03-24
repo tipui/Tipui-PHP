@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-01-22 20:30:00
+* @updated: 2014-03-18 10:30:00
 */
 
 namespace Tipui\Builtin\Libs\DataValidation;
@@ -49,6 +49,12 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 	{
 
 		/**
+		* Handles errors.
+		*/
+		$this -> rs['error']        = false; //array()
+		$this -> rs['method_error'] = false;
+
+		/**
 		* The required method, defined on method Form() of model class.
 		*/
 		$method = Form::GetMethod();
@@ -62,10 +68,12 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 		/**
 		* Requested method must be equal to request method defined on model Form() method.
 		* If $method is false, then, allows any method.
+		* [review] Maybe is better to deny the false method.
 		*/
-		if( $method !== false and $routing['method'] != $method )
+		if( $method !== false && $routing['method'] != $method )
 		{
-			return false;
+			$this -> rs['method_error'] = $routing['method'];
+			return $this -> rs;
 		}
 
 		/**
@@ -78,11 +86,6 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 		* Handles values.
 		*/
 		$this -> rs[DataRules::VALUE] = array();
-
-		/**
-		* Handles errors.
-		*/
-		$this -> rs['error'] = array();
 
 		if( !empty( $this -> parameters ) )
 		{
