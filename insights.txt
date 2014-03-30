@@ -1,10 +1,15 @@
 /**
 *
-* Update: 2014-03-24 21:19:00
+* Update: 2014-03-29 19:09:00
 *
 * [insights]
  - Implementation of context for Core.
    documentation
+   getmethoddatacache setmethoddatacache as deprecated
+   Core -> env as deprecated
+   Core::core_cached_data optimize
+   [review] config from context (remove or not?)
+ 
  - http://dev-php.tipui.com/Docs/Builtin/Helpers/HTML/Form/SetNameAsArray (the post method)
  - Form::SetElement(), Form::SetURLParam() inside array wose index is the method defined in Form::SetMethod() or the defaults.
  - vendors (hashids, alphaid, phpmailer, swiftmailer)
@@ -25,6 +30,7 @@
 	Need to check from witch method the parameters came.
 
  - LANGUAGES_IN_FOLDER
+ - Core::GetENV is public.. review to change to private.
  - review using realpath() to canonicalize the paths on everything that is using str_replace() for slashes compatibility
  - translations for notices and warning of builtin codes
  - Deny access to Core instance from not allowed scripts.

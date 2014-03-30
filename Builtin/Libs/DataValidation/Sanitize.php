@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-18 10:30:00
+* @updated: 2014-03-29 02:53:00
 */
 
 namespace Tipui\Builtin\Libs\DataValidation;
@@ -63,16 +63,16 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 		/**
 		* Gets parameters from cached session
 		*/
-		$routing = \Tipui\Core::GetConf() -> GetMethodDataCache( 'Routing' );
+		$routing = \Tipui\Core::GetContext() -> Routing;
 
 		/**
 		* Requested method must be equal to request method defined on model Form() method.
 		* If $method is false, then, allows any method.
 		* [review] Maybe is better to deny the false method.
 		*/
-		if( $method !== false && $routing['method'] != $method )
+		if( $method !== false && $routing -> method != $method )
 		{
-			$this -> rs['method_error'] = $routing['method'];
+			$this -> rs['method_error'] = $routing -> method;
 			return $this -> rs;
 		}
 
@@ -117,7 +117,7 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 				* $i holds the counter that represents the numeric indexes
 				* $k holds the name of parameters
 				*/
-				$idx = ( $routing['mode_rewrite'] === true ) ? $i++ : $k;
+				$idx = ( $routing -> mode_rewrite === true ) ? $i++ : $k;
 
 				/**
 				* Hold the current parameter name.
@@ -132,7 +132,7 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 				if( $k == 'foo' )
 				{
 					var_dump( $_FILES ); exit;
-					var_dump( $routing['params'] ); exit;
+					var_dump( $routing -> params ); exit;
 				}
 				*/
 
@@ -192,13 +192,13 @@ class Sanitize extends \Tipui\Builtin\Libs\DataValidation
 					*/
 					//print_r( $this -> rs ); exit;
 
-				}else if( isset( $routing['params'][$idx] ) ){
+				}else if( isset( $routing -> params[$idx] ) ){
 
 					/**
 					* Check if received parameter exists from requested parameters (url, cli), except uploaded files ($_FILES)
 					*/
 
-					$this -> rs[DataRules::VALUE][$k] = $routing['params'][$idx];
+					$this -> rs[DataRules::VALUE][$k] = $routing -> params[$idx];
 
 					/**
 					* Debug purposes

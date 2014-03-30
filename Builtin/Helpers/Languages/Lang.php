@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-28 00:37:00
+* @updated: 2014-03-29 02:53:00
 */
 
 namespace Tipui\Builtin\Helpers\Languages;
@@ -33,7 +33,7 @@ class Lang extends \Tipui\Builtin\Helpers\Languages
 			/**
 			* Retrieves from user current session
 			*/
-			if( !$lang_code = \Tipui\Core::GetConf()->GetMethodDataCache('LanguageCodeFromParameters') )
+			if( !$lang_code = \Tipui\Core::GetContext()->LanguageCodeFromParameters )
 			{
 				/**
 				* Retrieves from defaults

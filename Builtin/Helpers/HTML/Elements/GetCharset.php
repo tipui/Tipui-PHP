@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2013-09-22 14:44:00
+* @updated: 2014-03-29 02:53:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\Elements;
@@ -35,7 +35,9 @@ class GetCharset extends \Tipui\Builtin\Helpers\HTML\Elements
 		// [review:high] create new method to stores the Model customs override settings
 		/*
 		$c      = new \Tipui\Core;
-		$module = $c -> GetMethodDataCache( 'Routing' );
+		$module = $c -> context -> Routing;
+		or
+		$module = \Tipui\Core::GetContext()->Routing;
 		print_r( $module ); exit;
 		*/
 

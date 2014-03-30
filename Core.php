@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-24 21:19:00
+* @updated: 2014-03-29 19:09:00
 */
 
 namespace Tipui;
@@ -67,13 +67,9 @@ class Core
 
 	/**
 	* Handle core data cache file content.
+	* [deprecated]
 	*/
 	private $core_cached_data;
-
-	/**
-	* Handle methods results.
-	*/
-	private $core_methods_cached_data;
 
 	/**
 	* Builtin language code
@@ -138,22 +134,31 @@ class Core
 	const CACHE_FILE_EXTENSION = '.json';
 
 	/**
+	* The static method that return the object self::$context_holder
+	*/
+	const CONTEXT_CALLER = 'Tipui\Core::GetContext';
+
+	/**
 	* The static method that calls Core->GetEnv()
 	*/
 	const CONF_CALLER = 'Tipui\Core::GetConf';
+	//const CONF_CALLER = 'Tipui\Core::GetConf->context';
 
 	/**
 	* Model/Module session/cookie array index (id)
+	* [deprecated]
 	*/
 	const MODEL_CACHE_SESSION_NAME = 'Tipui::App::Model';
 
 	/**
 	* Storage mode option name as Session $_SESSION
+	* [deprecated]
 	*/
 	const STORAGE_CACHE_MODE_SESSION = 'session';
 
 	/**
 	* Storage mode option name as Cookie $_COOKIE
+	* [deprecated]
 	*/
 	const STORAGE_CACHE_MODE_COOKIE = 'cookie';
 
@@ -265,10 +270,9 @@ class Core
 	*/
     public function ResetProperties()
     {
-		$this -> env     = null;
-		$this -> fs      = null;
-		$this -> core_methods_cached_data = null;
-		$this -> core_cached_data         = null;
+
+		$this -> fs               = null;
+		$this -> core_cached_data = null;
 
 		return null;
 	}
@@ -284,13 +288,29 @@ class Core
 		* Debug purposes
 		*/
 		//echo __NAMESPACE__ ; exit;
-		//echo $this -> called_from . '->' . $key  . PHP_EOL; // exit;
+		//echo 'called_from: ' . $this -> called_from . '->' . $key  . PHP_EOL; // exit;
+
+		//if( $this -> called_from == 'Tipui\Core::__get' && ( $key == 'LanguageCodeFromParameters' ) )
+		//{
+			//echo time(); exit;
+		//}
 
 		/**
-		* Execute only if is called from static "alias" method [code]self::CONF_CALLER[/code].
+		* Execute only if is called from static "alias" method [code]self::CONTEXT_CALLER[/code].
 		*/
-		if( $this -> called_from == self::CONF_CALLER )
+		if( $this -> called_from == self::CONTEXT_CALLER )
 		{
+		
+			if( property_exists( self::$context_holder, $key ) )
+			{
+				return self::$context_holder -> {$key};
+			}
+
+		}else if( $this -> called_from == self::CONF_CALLER ){
+
+			/**
+			* Execute only if is called from static "alias" method [code]self::CONF_CALLER[/code].
+			*/
 
 			/**
 			* Debug purposes
@@ -322,7 +342,7 @@ class Core
 			*/
 			//echo PHP_EOL . __FILE__ . PHP_EOL;
 			//var_dump( self::$called_context ); echo PHP_EOL;
-			//echo 'bb: ' . $this -> called_from . ' :->' . $key; //exit;
+			//echo 'bb: ' . $this -> called_from . ' :->' . $key . PHP_EOL; //exit;
 			//echo PHP_EOL . 'array: '; print_r( self::$context_holder ); exit;
 			//self::$context_holder['foo'] = 'bar2';
 
@@ -338,31 +358,6 @@ class Core
 				*/
 				throw new \Exception('Core context index "' . $index . '" was not found.');
 			}
-
-		}else if( $key == 'context' ){
-
-			/**
-			* Debug purposes
-			*/
-			//echo time() . PHP_EOL;
-			//print_r( self::$context_holder ); echo PHP_EOL;
-
-			/**
-			* Sets the flag identifying that [code]$context[/code] was called. 
-			*/
-			self::$called_context = $key;
-
-			/**
-			* Debug purposes
-			*/
-			//self::ContextSet( 'foo', 'bar' );
-			//$trace = debug_backtrace();
-			//print_r( $trace ); exit;
-
-			/**
-			* Returning self static object
-			*/
-			return new self();
 
 		}
 
@@ -391,11 +386,22 @@ class Core
 	public static function GetConf()
 	{
 		return new self(); // new Core()
+		//return self::$context_holder -> config;
+		//$c = new self();
+		//return $c -> context;
+	}
+
+	/**
+	* Calls Core::context as static chained in fluent way.
+	*/
+	public static function GetContext()
+	{
+		return self::$context_holder;
 	}
 
 	/**
 	* Registered environment settings files
-	* If necessary to use $this -> env[] check the self::LoadSettings(). There are 2 points, one for existing cache and other when is cache files is created.
+	* @see self::LoadSettings(). There are 2 points, one for existing cache and other when is cache files is created.
 	*/
     private function GetRegisteredSettingsFiles()
     {
@@ -411,6 +417,9 @@ class Core
 	* Example for getting:
 	* \Tipui\Core -> context -> form_data_error;
 	* displays: error_code_test
+	*
+	* @param $key: (string) key name.
+	* @param $value: object or array.
 	*
 	* @see self::__get()
 	* @see self::$called_context
@@ -434,8 +443,28 @@ class Core
 
 			foreach( $value as $k => $v )
 			{
+
+				/**
+				* If not exists, must initialize as stdClass or array casted as object to avoid the strict warning "creating default object from empty value".
+				*/
+				if( !property_exists( self::$context_holder, $key ) )
+				{
+					self::$context_holder -> {$key} = (object) array(); // new stdClass();
+				}
+
 				self::$context_holder -> {$key} -> {$k} = $v;
+
 			}
+
+			/**
+			* Debug purposes
+			*/
+			/*
+			if( $key == 'Routing' )
+			{
+				print_r( self::$context_holder ); exit;
+			}
+			*/
 
 		}else{
 
@@ -472,6 +501,11 @@ class Core
 		//print_r( $env_json ); exit;
 
 		/**
+		* Declaring the stdClass instance.
+		*/
+		$this -> ContextSet( 'config', array( 'env' => (object) array() ) );
+
+		/**
 		* Instantiates Library FileSystem
 		*/
 		$this -> fs = new Libs\FileSystem;
@@ -481,7 +515,7 @@ class Core
 		* If exists, interrupts execution of this method inside the conditional.
 		* 
 		*/
-		if( !$env_json['CACHE_REGENERATE'] and $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CACHE_FILE_EXTENSION ) )
+		if( !$env_json['CACHE_REGENERATE'] && $this -> fs -> FileExists( $this -> cache_storage_env_dir . 'ENV' . self::CACHE_FILE_EXTENSION ) )
 		{
 
 			/**
@@ -490,15 +524,21 @@ class Core
 			*/
 			$env       = $this -> GetEnv( 'ENV' );
 			$bootstrap = $this -> GetEnv( 'BOOTSTRAP' );
-			$array     = $this -> GetEnv( 'PHP' );
+			$array     = $this -> GetEnv( 'PHP' ); // The variable name must be generic "array" because the self::SetEnv() method.
 			require_once( $env['PATH'] . 'PHP_INI_SET' . TIPUI_CORE_ENV_FILE_EXTENSION );
 
 			/**
-			* Loads URL and MODULES configuration from cache files.
+			* Loads URL and MODULES configuration from cache files to context.
+			* Access sample:
+			* print_r( Core -> context -> config -> env -> URL );
 			*/
-			$this -> env['URL']       = $this -> GetEnv( 'URL' );
-			$this -> env['MODULES']   = $this -> GetEnv( 'MODULES' );
-			$this -> env['LANGUAGES'] = $this -> GetEnv( 'LANGUAGES' );
+
+			/**
+			* Adding the objects for the new instance.
+			*/
+			self::$context_holder -> {'config'} -> {'env'} -> {'URL'} = $this -> GetEnv( 'URL' );
+			self::$context_holder -> {'config'} -> {'env'} -> {'MODULES'} = $this -> GetEnv( 'MODULES' );
+			self::$context_holder -> {'config'} -> {'env'} -> {'LANGUAGES'} = $this -> GetEnv( 'LANGUAGES' );
 
 			/**
 			* Clear FileSystem instance handler.
@@ -511,9 +551,9 @@ class Core
 			unset( $script_path, $env_json, $app_conf_path, $env );
 
 			/**
-			* Saves methods results to cache
+			* Saves methods results to context
 			*/
-			$this -> SaveToCache();
+			$this -> SaveToContext();
 
 			/**
 			* Data was retrieve from cache.
@@ -580,7 +620,7 @@ class Core
 		/**
 		* Saves methods results to cache
 		*/
-		$this -> SaveToCache();
+		$this -> SaveToContext();
 
 
 		return null;
@@ -591,24 +631,28 @@ class Core
 	/**
 	* Executes and saves Core required initialization methods to cache.
 	*/
-    private function SaveToCache()
+    private function SaveToContext()
     {
+
+		/**
+		* Storing Core methods results to context object
+		*/
 
 		/**
 		* Saves the Interface type information.
 		* If true, is running under CLI (Command Line Interface)
 		*/
-		$this -> SetMethodDataCache( 'IsCliMode' );
+		self::ContextSet( 'IsCliMode', $this -> IsCliMode() );
 
 		/**
 		* Saves data extracted from URL (parameters and routing).
 		*/
-		$this -> SetMethodDataCache( 'Routing' );
+		self::ContextSet( 'Routing', $this -> Routing() );
 
 		/**
 		* Stores the interface language code.
 		*/
-		$this -> SetMethodDataCache( 'LanguageCodeFromParameters' );
+		self::ContextSet( 'LanguageCodeFromParameters', $this -> LanguageCodeFromParameters() );
 
 		return null;
 	}
@@ -665,9 +709,18 @@ class Core
 	*/
     private function SetENV( $index, $value )
     {
-		$this -> env[ $index ] = $value;
+
+		/**
+		* Stores to context.
+		*/
+		self::$context_holder -> {'config'} -> {'env'} -> {$index} = $value;
+
+		/**
+		* Stores to cache files.
+		*/
 		$this -> fs -> WriteFile( $this -> cache_storage_env_dir . $index . self::CACHE_FILE_EXTENSION, json_encode( $value ) );
 		return null;
+
 	}
 
 	/**
@@ -738,6 +791,7 @@ class Core
 
 			/**
 			* Non fluent
+			* [deprecated] use context instead
 			*/
 			if( !$subindex )
 			{
@@ -775,6 +829,7 @@ class Core
 	/**
 	* Retrieves the cli mode
 	* (boolean)
+	* @see self::SaveToContext()
 	*/
     private function IsCliMode()
     {
@@ -818,7 +873,7 @@ class Core
 		*/
 		if( $this -> sapi_is_cli )
 		{
-			$c -> SetParameter( $this -> env['URL']['PARAM_NAME'] );
+			$c -> SetParameter( self::$context_holder -> config -> env -> URL['PARAM_NAME'] );
 		}
 
 		/**
@@ -829,7 +884,7 @@ class Core
 		/**
 		* Set the URL basic parts
 		*/
-		$c -> SetURLParts( $this -> env['URL']['HREF_BASE'] );
+		$c -> SetURLParts( self::$context_holder -> config -> env -> URL['HREF_BASE'] );
 
 		/**
 		* Debug purposes
@@ -860,7 +915,12 @@ class Core
 	/**
 	* Extracts the language code from parameters, if exists.
 	* If found, the code is validated with array of languages defined in app/config/env/LANGUAGES
-	* To read the value: [/code]\Tipui\Core::GetConf()->GetMethodDataCache('LanguageCodeFromParameters')[/code]
+	* To read the value [deprecated]: [code]\Tipui\Core::GetConf()->GetMethodDataCache('LanguageCodeFromParameters')[/code]
+	* To read the value: 
+	* [code]\Tipui\Core::GetContext()->LanguageCodeFromParameters[/code]
+	* or 
+	* [code]$c = new \Tipui\Core(); $c -> context -> LanguageCodeFromParameters[/code]
+	* @see self::SaveToContext()
 	*/
     private function LanguageCodeFromParameters()
     {
@@ -893,13 +953,12 @@ class Core
 		if( is_array( $this -> request['params'] ) )
 		{
 
-			if( isset( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] ) )
+			if( isset( $this -> request['params'][self::$context_holder -> config -> env -> URL['PARAM_LANG']] ) )
 			{
 				/**
 				* For normal requests by GET or POST, not for URL rewrite format.
 				*/
-				//echo $this -> request['params'][$this -> env['URL']['PARAM_LANG']] . PHP_EOL;
-				$this -> lang_code = strtolower( $this -> request['params'][$this -> env['URL']['PARAM_LANG']] );
+				$this -> lang_code = strtolower( $this -> request['params'][self::$context_holder -> config -> env -> URL['PARAM_LANG']] );
 			}
 
 		}else{
@@ -921,7 +980,7 @@ class Core
 			/**
 			* If parameters folder separator was found or, if found empty character, then, validates as possible language code.
 			*/
-			if( empty( $slash_check ) || $slash_check == $this -> env['URL']['PFS'] )
+			if( empty( $slash_check ) || $slash_check == self::$context_holder -> config -> env -> URL['PFS'] )
 			{
 				/**
 				* Formatting the string according to ISO 639-1 for languages codes.
@@ -946,8 +1005,7 @@ class Core
 		* If not exists, will be ignored and setted to null.
 		* The language code is case insensitive.
 		*/
-		//print_r( $this -> env['LANGUAGES'] ); exit;
-		if( !empty( $this -> lang_code ) && !isset( $this -> env['LANGUAGES'][$this -> lang_code] ) )
+		if( !empty( $this -> lang_code ) && !isset( self::$context_holder -> config -> env -> LANGUAGES[$this -> lang_code] ) )
 		{
 			$this -> lang_code = null;
 		}
@@ -961,7 +1019,7 @@ class Core
 
 	/**
 	* Prepare routing
-	* @see self::SaveToCache()
+	* @see self::SaveToContext()
 	*/
     private function Routing()
     {
@@ -983,14 +1041,14 @@ class Core
 
 		/**
 		* If $this -> request['params'] is array, means that is comming from normal URL.
-		* For this case, must check if $this -> env['URL']['PARAM_NAME'] exists in the array indexes.
+		* For this case, must check if ['PARAM_NAME'] exists in the array indexes.
 		*/
 		if( !$this -> request['mode_rewrite'] )
 		{
 
-			if( isset( $this -> request['params'][$this -> env['URL']['PARAM_NAME']] ) )
+			if( isset( $this -> request['params'][self::$context_holder -> config -> env -> URL['PARAM_NAME']] ) )
 			{
-				$module_uri = $this -> request['params'][$this -> env['URL']['PARAM_NAME']];
+				$module_uri = $this -> request['params'][self::$context_holder -> config -> env -> URL['PARAM_NAME']];
 			}
 
 		}else{
@@ -1039,7 +1097,7 @@ class Core
 					/**
 					* Removes the parameter folder separator character, if exists.
 					*/
-					if( substr( $module_uri, 0, 1 ) == $this -> env['URL']['PFS'] )
+					if( substr( $module_uri, 0, 1 ) == self::$context_holder -> config -> env -> URL['PFS'] )
 					{
 						$module_uri = substr( $module_uri, 1 );
 					}
@@ -1061,7 +1119,7 @@ class Core
 			/**
 			* Building the class name
 			*/
-			$clss = str_replace( $this -> env['URL']['PFS'], DIRECTORY_SEPARATOR, $module_uri );
+			$clss = str_replace( self::$context_holder -> config -> env -> URL['PFS'], DIRECTORY_SEPARATOR, $module_uri );
 
 		}
 
@@ -1076,7 +1134,7 @@ class Core
 			/**
 			* If parameter is empty, loads Front Module (default module)
 			*/
-			if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['Front'] ) )
+			if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, self::$context_holder -> config -> env -> MODULES['Front'] ) )
 			{
 				throw new \Exception('Front Module is invalid or not found. Check MODULES.php in /app/config/env/');
 			}
@@ -1133,7 +1191,7 @@ class Core
 		/**
 		* Debug purposes
 		*/
-		//echo $rs['class'] . PHP_EOL . $this -> env['MODULES']['404']; exit;
+		//echo $rs -> class . PHP_EOL . self::$context_holder -> config -> env -> MODULES['404']; exit;
 
 
 		/**
@@ -1141,12 +1199,12 @@ class Core
 		* The occurrency of duplicated slash may cause fatal errors.
 		* If class name is not the default and valid 404 not found module, check the name against the filtered name.
 		*/
-		if( $rs['class'] != $this -> env['MODULES']['404'] )
+		if( $rs -> class != self::$context_holder -> config -> env -> MODULES['404'] )
 		{
 			/**
 			* If DIRECTORY_SEPARATOR is backslash, this prevents conflict with forward slash.
 			*/
-			$cl_name = str_replace( DIRECTORY_SEPARATOR, '/', $rs['class'] );
+			$cl_name = str_replace( DIRECTORY_SEPARATOR, '/', $rs -> class );
 
 			/**
 			* Debug purposes
@@ -1188,8 +1246,8 @@ class Core
 		/**
 		* Retrieves method and mode_rewrite parameters from $request property to Routing() output result.
 		*/
-		$rs['method']       = $this -> request['method'];
-		$rs['mode_rewrite'] = $this -> request['mode_rewrite'];
+		$rs -> method       = $this -> request['method'];
+		$rs -> mode_rewrite = $this -> request['mode_rewrite'];
 
 		/**
 		* Clear $request property
@@ -1206,12 +1264,12 @@ class Core
 		* Debug purposes
 		* Include the module file
 		*/
-		//require_once( $rs['path'] );
+		//require_once( $rs -> path );
 
 		/**
 		* Debug purposes
 		* Sample to load a module
-		$clss = '\Tipui\App\Model\\' . str_replace( DIRECTORY_SEPARATOR, '\\', $rs['class'] );
+		$clss = '\Tipui\App\Model\\' . str_replace( DIRECTORY_SEPARATOR, '\\', $rs -> class );
 		$c = new $clss;
 		$c -> View(); exit;
 		*/
@@ -1232,7 +1290,7 @@ class Core
 		* Folders levels limit
 		* @see Docs/Core/GetConf/URL
 		*/
-		$i           = $this -> env['URL']['FOLDER_LEVELS'];
+		$i           = self::$context_holder -> config -> env -> URL['FOLDER_LEVELS'];
 
 		/**
 		* (boolean) true: path found, false: path not found
@@ -1240,9 +1298,9 @@ class Core
 		$goal        = false;
 
 		/**
-		* holds the results, if exists
+		* Holds the results, if exists
 		*/
-		$rs          = array();
+		$rs          = (object) array();
 
 		/**
 		* Handles the Routing/Module class
@@ -1283,7 +1341,8 @@ class Core
 					* The reason is that the namespaces uses backslash \
 					*/
 					$goal = true;
-					$rs   = array( 'path' => $path, 'class' => str_replace( '/', '\\', $clss ) );
+					$rs -> path  = $path;
+					$rs -> class = str_replace( '/', '\\', $clss );
 				}else{
 					/**
 					* Debug purposes
@@ -1309,16 +1368,16 @@ class Core
 					//print_r( $rs ); exit;
 
 					$goal       = true;
-					$rs['path'] = TIPUI_APP_PATH . self::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR . str_replace( '\\', DIRECTORY_SEPARATOR, $rs['class'] ) . TIPUI_CORE_ENV_FILE_EXTENSION;
+					$rs -> path = TIPUI_APP_PATH . self::APP_FOLDER_MODEL . DIRECTORY_SEPARATOR . str_replace( '\\', DIRECTORY_SEPARATOR, $rs -> class ) . TIPUI_CORE_ENV_FILE_EXTENSION;
 
-					if( !file_exists( $rs['path'] ) )
+					if( !file_exists( $rs -> path ) )
 					{
 						throw new \Exception('[' . $path_base . '] Alias class not found. Check \Tipui\App\Routing\Modules');
 					}
 
 				}else{
 					/*
-					$clss = substr( $clss, 0, strrpos( $clss, $this -> env['URL']['PFS'] ) );
+					$clss = substr( $clss, 0, strrpos( $clss, self::$context_holder -> config -> env -> URL['PFS'] ) );
 					//echo PHP_EOL . 'ng [next] ' . $clss;
 					*/
 				}
@@ -1346,6 +1405,7 @@ class Core
 				$path = TIPUI_APP_PATH . $path_base . DIRECTORY_SEPARATOR . $clss . TIPUI_CORE_ENV_FILE_EXTENSION;
 
 			}else{
+
 				/**
 				* Debug purposes
 				*/
@@ -1354,12 +1414,13 @@ class Core
 				/**
 				* If $path_params is array, must reverse the indexes order.
 				*/
-				$rs['params'] = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
+				$rs -> params = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
 
 				/**
 				* Debug purposes
 				*/
-				//$rs['params'] = $path_params;
+				//$rs -> params = $path_params;
+
 			}
 
 			/**
@@ -1383,14 +1444,14 @@ class Core
 		/**
 		* If $path_params is array, must reverse the indexes order.
 		*/
-		$rs['params'] = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
+		$rs -> params = ( $path_params ) ? array_reverse( $path_params ) : $path_params;
 
 		/**
 		* If parameters are not in mode rewrite format (friendly url), must receive 'params' from $this -> request property.
 		*/
 		if( !$this -> request['mode_rewrite'] )
 		{
-			$rs['params'] = $this -> request['params'];
+			$rs -> params = $this -> request['params'];
 		}
 
 		/**
@@ -1417,7 +1478,7 @@ class Core
 	public function LoadNotFoundModule()
 	{
 
-		if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, $this -> env['MODULES']['404'] ) )
+		if( !$rs = $this -> RoutingPathScanner( self::APP_FOLDER_MODEL, self::$context_holder -> config -> env -> MODULES['404'] ) )
 		{
 			throw new \Exception('404/NotFound Module is invalid or not found. Check MODULES.php in /app/config/env/');
 		}
@@ -1435,154 +1496,22 @@ class Core
 		/**
 		* Must keep the request method from original request.
 		*/
-		$to_module['method']       = $from_module['method'];
-		$to_module['mode_rewrite'] = $from_module['mode_rewrite'];
+		$to_module -> method       = $from_module -> method;
+		$to_module -> mode_rewrite = $from_module -> mode_rewrite;
 
 		/**
 		* Saving the information of the module that was previously loaded.
 		*/
-		$to_module['changed_from'] = $from_module;
+		//$to_module['changed_from'] = $from_module;
+		$to_module -> changed_from = $from_module;
 
 		/**
 		* Loading Model Class.
 		*/
-		$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\\' . self::APP_FOLDER_MODEL . '\\' . $to_module['class'];
-		//$m = new $clss;
+		$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\\' . self::APP_FOLDER_MODEL . '\\' . $to_module -> class;
+		$to_module -> class_namespace = $clss;
 
-		return array( 'module_info' => $to_module, 'module_object' => new $clss );
-
-	}
-
-	/**
-	* Retrieves the cached Core data on storage cache files
-	*/
-	public function GetMethodDataCache( $method = false, $instance = false )
-	{
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] ); exit;
-
-		/**
-		* Prevents accessing this method directly.
-		*/
-		$reflect = new \ReflectionClass($this);
-		if( $reflect->getName() != __CLASS__ )
-		{
-			throw new \Exception('Access to method "' . __METHOD__ . '" is stricted by ' . __CLASS__ . '. Use \Tipui\Core::GetConf()->GetMethodDataCache() instead');
-		}
-
-		/**
-		* Creates new instance of Cache library if not exists.
-		*/
-		( $this -> cache == null ) ? $this -> cache = new Libs\Cache : null;
-
-		/**
-		* [review:medium] Temporary conditional. Display warning message if storage mode is sqlite
-		*/
-		/* [deprecated:2013-12-24]
-		if( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] == self::STORAGE_CACHE_MODE_SQLITE )
-		{
-			throw new \Exception('Core method cache storage in sqlite not available.');
-		}
-		*/
-
-		$this -> core_methods_cached_data[$method] = $this -> cache -> Get( 'Tipui::Core::' . $method );
-		//var_dump( $this -> core_methods_cached_data[$method] ); exit;
-
-		/**
-		* Debug purposes
-		*/
-		/*
-		if( !isset( $this -> core_methods_cached_data[$method] -> invalid_key ) )
-		{
-			echo 22;
-		}else{
-			echo 23;
-		}
-		exit;
-		*/
-
-		/**
-		* If is valid session array key
-		*/
-		if( !isset( $this -> core_methods_cached_data[$method] -> invalid_key ) )
-		{
-
-			/**
-			* Decrypt from cached session data
-			*/
-			$this -> core_methods_cached_data[$method] = Libs\Encryption::Auto() -> Decode( $this -> core_methods_cached_data[$method] );
-
-			/**
-			* Debug purposes
-			*/
-			//print_r( Libs\Encryption::Auto() -> Decode( $this -> core_methods_cached_data[$method] ) ); exit;
-			//print_r( $this -> core_methods_cached_data[$method] ); exit;
-
-			/**
-			* Return results
-			*/
-			if( !$instance )
-			{
-
-				return $this -> core_methods_cached_data[$method];
-
-			}else{
-
-				if( isset( $this -> core_methods_cached_data[$method][$instance] ) )
-				{
-
-					return $this -> core_methods_cached_data[$method][$instance];
-
-				}else{
-
-					throw new \Exception('Core method cache data instance "' . $instance . '" not found for method "' . $method . '".');
-
-				}
-
-			}
-
-		}else{
-
-			throw new \Exception('Core method cache "' . $method . '" not found.');
-
-		}
-
-	}
-
-	/**
-	* Stores methods results to cache (session)
-	*/
-	private function SetMethodDataCache( $method )
-	{
-
-		/*
-		* [review]
-		* Maybe necessary check if method belongs to class Core()
-		*/
-
-
-		/**
-		* Debug purposes
-		*/
-		//print_r( $this -> core_cached_data['BOOTSTRAP']['CORE_METHODS_CACHE_STORAGE_MODE'] ); exit;
-
-		/**
-		* Creates new instance of Cache library if not exists.
-		*/
-		( $this -> cache == null ) ? $this -> cache = new Libs\Cache : null;
-
-		/**
-		* Stores data to cache
-		*/
-		$this -> cache -> Set( array(
-								'Tipui::Core::' . $method => Libs\Encryption::Auto() -> Encode( $this -> $method() )
-								)
-							);
-
-		return null;
+		return (object) array( 'module_info' => $to_module, 'module_object' => new $clss );
 
 	}
 

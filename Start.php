@@ -7,7 +7,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-03-24 21:19:00
+* @updated: 2014-03-29 19:09:00
 *
 * Git: https://github.com/tipui/Tipui-PHP
 */
@@ -44,7 +44,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	define( 'TIPUI_CORE_ENV_FILE_EXTENSION', '.php' );
 
 	// App folder name
-	define( 'TIPUI_APP_FOLDER_NAME', 'app' );
+	define( 'TIPUI_APP_FOLDER_NAME', 'App' );
 
 	// Override folder name
 	define( 'TIPUI_FOLDER_OVERRIDE', 'Override' );
@@ -124,15 +124,14 @@ if( !defined( 'TIPUI_PATH' ) )
 	$c -> LoadSettings();
 
 	/**
-	* Get environment settings
+	* Get environment settings of templates
+	* Is required when the module have Template() or View() methods
 	*/
-	$env_bootstrap = $c -> GetEnv( 'BOOTSTRAP' );
 	$env_templates = $c -> GetEnv( 'TEMPLATES' );
 
 	/**
 	* Debug purposes
 	*/
-	//print_r($env_bootstrap); exit;
 	//print_r($env_templates); exit;
 
 	/**
@@ -141,15 +140,18 @@ if( !defined( 'TIPUI_PATH' ) )
 
 	/**
 	* Retrieves Core routing cached data.
-	* @see Core::LoadSettings(), Core::SaveToCache()
+	* @see Core::LoadSettings(), Core::SaveToContext()
 	*/
-	$module = $c -> GetMethodDataCache( 'Routing' );
+	//var_dump( $c::GetContext() -> Routing ); exit;
+	$module = $c::GetContext() -> Routing;
 
 	/**
 	* Flag for "module change".
 	* Example, if want to load different module from what as requested, regardless if is found or not.
 	*/
-	$module['changed_from'] = null;
+	//echo $module -> class; exit;
+	//$module['changed_from'] = null;
+	$module -> changed_from = null;
 
 	/**
 	* Debug purposes
@@ -160,8 +162,8 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Loading Model Class
 	*/
-	$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\\' . $c::APP_FOLDER_MODEL . '\\' . $module['class'];
-	$module['class_namespace'] = $clss;
+	$clss = '\Tipui\\' . TIPUI_APP_FOLDER_NAME . '\\' . $c::APP_FOLDER_MODEL . '\\' . $module -> class;
+	$module -> class_namespace = $clss;
 	$m = new $clss;
 
 	/**
@@ -179,8 +181,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	* Debug purposes
 	*/
 	//$c::ContextSet( 'foo', 'bar' );
-	//print_r( $c -> context ); exit;
-	//echo 'start: '; print_r( $c -> context -> foo ); exit;
+	//print_r( $c::GetContext() -> foo ); exit;
 
 	/**
 	* Call module Form method, if exists
@@ -230,12 +231,12 @@ if( !defined( 'TIPUI_PATH' ) )
 		/**
 		* Holding the context for resturned results from Model::Form() method
 		*/
-		$c::ContextSet( $module['class_namespace'], array( 'form_data' => $m -> form_data ) );
+		$c::ContextSet( $module -> class_namespace, array( 'form_data' => $m -> form_data ) );
 
 		/**
 		* Debug purposes
 		*/
-		//print_r( $c -> context -> {$module['class_namespace']} -> form_data ); exit;
+		//print_r( $c::GetContext() -> {$module -> class_namespace} -> form_data ); exit;
 		//var_dump( $m -> form_data ); exit;
 		//print_r( $m -> form_data ); exit;
 		//echo current( $module['params'] ) . PHP_EOL;
@@ -253,7 +254,7 @@ if( !defined( 'TIPUI_PATH' ) )
 		* If receiving parameters, probably, is an wrong URL
 		* By default, must result in 404 "not found page".
 		*/
-		if( isset( $module['params'] ) && is_array( $module['params'] ) && current( $module['params'] ) !== false )
+		if( isset( $module -> params ) && is_array( $module -> params ) && current( $module -> params ) !== false )
 		{
 
 			/**
@@ -266,12 +267,12 @@ if( !defined( 'TIPUI_PATH' ) )
 			/**
 			* The information of new target module.
 			*/
-			$module = $module_change['module_info'];
+			$module = $module_change -> module_info;
 
 			/**
 			* The instance of module loaded.
 			*/
-			$m      = $module_change['module_object'];
+			$m      = $module_change -> module_object;
 
 			/**
 			* Clear used variable.
@@ -291,14 +292,15 @@ if( !defined( 'TIPUI_PATH' ) )
 	* Handles data for model cache
 	* [review]
 	* original was (2014-03-24 19:57):
-	* $model_cache = $module['changed_from'];
+	* $model_cache = $module -> changed_from;
 	*/
-	$model_cache = isset( $module['changed_from'] ) ? $module['changed_from'] : array();
+	$model_cache = isset( $module -> changed_from ) ? $module -> changed_from : (object) array();
+	//var_dump( $model_cache ); exit;
 
 	/**
 	* Module/Model class name
 	*/
-	$model_cache['name'] = !isset( $module['change']['class'] ) ? $module['class'] : $module['change']['class'];
+	$model_cache -> name = !isset( $module -> change -> class ) ? $module -> class : $module -> change -> class;
 
 	/**
 	* Retrieving Model Header method, if exists
@@ -306,13 +308,13 @@ if( !defined( 'TIPUI_PATH' ) )
 	if( method_exists( $m, 'Header' ) )
 	{
 
-		$model_cache['Header'] = $m -> Header();
+		$model_cache -> Header = $m -> Header();
 
 	}else{
 
 		if( !empty( $http_status_code ) )
 		{
-			$model_cache['Header']['http_status'] = $http_status_code;
+			$model_cache -> Header['http_status'] = $http_status_code;
 		}
 
 	}
@@ -320,13 +322,13 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Dispatching the HTTP Status, if defined on model or if [code]$http_status_code[/code] is not empty
 	*/
-	if( isset( $model_cache['Header']['http_status'] ) )
+	if( isset( $model_cache -> Header['http_status'] ) )
 	{
 
 		/**
 		* Output's custom header HTTP Status
 		*/
-		Libs\Header::HTTPStatus( $model_cache['Header']['http_status'] );
+		Libs\Header::HTTPStatus( $model_cache -> Header['http_status'] );
 	}
 
 	/**
@@ -335,15 +337,26 @@ if( !defined( 'TIPUI_PATH' ) )
 	*/
 	if( method_exists( $m, 'Template' ) )
 	{
-		$model_cache['Template'] = $m -> Template();
+		$model_cache -> Template = $m -> Template();
+
+		/**
+		* Get environment settings of bootstrap
+		*/
+		$env_bootstrap = $c -> GetEnv( 'BOOTSTRAP' );
 
 		/**
 		* Outputs the header content-type and charset
 		*/
 		Libs\Header::ContentType( 
-				( !isset( $model_cache['Template']['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache['Template']['content_type'] ),
-				( !isset( $model_cache['Template']['charset'] ) ? $env_bootstrap['CHARSET'] : $model_cache['Template']['charset'] )
+				( !isset( $model_cache -> Template['content_type'] ) ? $env_templates['DEFAULT_CONTENT_TYPE'] : $model_cache -> Template['content_type'] ),
+				( !isset( $model_cache -> Template['charset'] ) ? $env_bootstrap['CHARSET'] : $model_cache -> Template['charset'] )
 		);
+
+		/**
+		* Clear used variable
+		*/
+		unset( $env_bootstrap );
+
 	}
 
 
@@ -351,20 +364,20 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Creates new instance of Cache library.
 	* [review]
+	* [deprecated]
 	* Mark as deprecated for use context or keep both?
-	* $c::ContextSet( $module['class_namespace'], array( 'model_cache' => $model_cache ) );
 	*/
-	Libs\Cache::Set( array( $c::MODEL_CACHE_SESSION_NAME => Libs\Encryption::Auto() -> Encode( $model_cache ) ) );
+	//Libs\Cache::Set( array( $c::MODEL_CACHE_SESSION_NAME => Libs\Encryption::Auto() -> Encode( $model_cache ) ) );
 
 	/**
 	* Stores the [code]$model_cache[/code] to context.
 	*/
-	$c::ContextSet( $module['class_namespace'], array( 'model_cache' => $model_cache ) );
+	$c::ContextSet( $module -> class_namespace, array( 'model_cache' => $model_cache ) );
 
 	/**
 	* Debug purposes
 	*/
-	//print_r( $c -> context -> {$module['class_namespace']} -> model_cache ); exit;
+	//print_r( $c::GetContext() -> {$module -> class_namespace} -> model_cache ); exit;
 
 	/**
 	* Rendering template if exists View() method
@@ -377,8 +390,8 @@ if( !defined( 'TIPUI_PATH' ) )
 		* [review]
 		* Defined in Routing Modules file, however, not implemented
 		* Must decide witch will have priority. The Routing alias module settings or the Template method of module.
-		$module['force_language']
-		$module['default_language']
+		$module -> force_language
+		$module -> default_language
 		*/
 
 		/**
@@ -392,9 +405,9 @@ if( !defined( 'TIPUI_PATH' ) )
 		if( $env_templates['LANGUAGES_IN_FOLDER'] )
 		{
 
-			if( !$lang_code = $c -> GetMethodDataCache( 'LanguageCodeFromParameters' ) )
+			if( !$lang_code = $c::GetContext() -> LanguageCodeFromParameters )
 			{
-				$lang_code = ( !isset( $model_cache['Template']['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache['Template']['language'] ) . DIRECTORY_SEPARATOR;
+				$lang_code = ( !isset( $model_cache -> Template['language'] ) ? $env_templates['DEFAULT_LANGUAGE'] : $model_cache -> Template['language'] ) . DIRECTORY_SEPARATOR;
 			}
 
 		}
@@ -417,7 +430,7 @@ if( !defined( 'TIPUI_PATH' ) )
 		*
 		* Call as instance
 		*/
-		$t -> Compile( $m -> View(), ( !isset( $model_cache['Template']['dir'] ) ? false : $model_cache['Template']['dir'] ), ( !isset( $model_cache['Template']['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module['class'] ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $model_cache['Template']['file'] ) );
+		$t -> Compile( $m -> View(), ( !isset( $model_cache -> Template['dir'] ) ? false : $model_cache -> Template['dir'] ), ( !isset( $model_cache -> Template['file'] ) ? str_replace( '\\', DIRECTORY_SEPARATOR, $module -> class ) . $env_templates['DEFAULT_FILE_EXTENSION'] : $model_cache -> Template['file'] ) );
 
 		/**
 		* Clear used variables.
@@ -429,7 +442,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Clear the variables and Core instance.
 	*/
-	unset( $c, $module, $m, $env_bootstrap, $env_templates, $model_cache );
+	unset( $c, $module, $m, $env_templates, $model_cache );
 
 	/**
 	* Benchmark debugging
@@ -440,6 +453,7 @@ if( !defined( 'TIPUI_PATH' ) )
 	/**
 	* Apache Benchmark
 	* > C:\Apache\httpd-2.2.25-win32-x86-openssl-0.9.8y\bin>ab -n 1000 -c 5 http://dev-php.tipui.com/
+	* > C:\Apache\2.4.9-x86-vc11-openssl_haus\bin\ab -n 1000 -c 5 http://dev-php.tipui.com/
 	*/
 
 }

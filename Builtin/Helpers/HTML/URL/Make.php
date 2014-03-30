@@ -8,7 +8,7 @@
 * @license http://opensource.org/licenses/GPL-3.0 GNU Public License
 * @company: Tipui Co. Ltda.
 * @author: Daniel Omine <omine@tipui.com>
-* @updated: 2014-02-02 00:37:00
+* @updated: 2014-03-29 02:53:00
 */
 
 namespace Tipui\Builtin\Helpers\HTML\URL;
@@ -65,7 +65,7 @@ class Make
 			/**
 			* Get Language Code value from cached data.
 			*/
-			$this -> cached_lang_code_from_param = \Tipui\Core::GetConf() -> GetMethodDataCache( 'LanguageCodeFromParameters' );
+			$this -> cached_lang_code_from_param = \Tipui\Core::GetContext() -> LanguageCodeFromParameters;
 
 			/**
 			* Debug purposes
